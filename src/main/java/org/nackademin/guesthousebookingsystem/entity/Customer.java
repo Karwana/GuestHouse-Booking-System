@@ -1,4 +1,4 @@
-package org.nackademin.guesthousebookingsystem.model;
+package org.nackademin.guesthousebookingsystem.entity;
 
 
 import jakarta.persistence.Entity;
