@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kunder</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            margin: 40px;
+        }
+
+        table{
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table, th, td{
+            border: 1px solid black;
+        }
+
+        th, td{
+            padding: 10px;
+        }
+
+        form{
+            margin-bottom: 40px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<h1>Kundhantering</h1>
+
+<h2>Lägg till kund</h2>
+
+<form th:action="@{/customers/save}"
+      th:object="${customer}"
+      method="post">
+
+    <label>Namn:</label>
+    <input type="text"
+           th:field="*{name}"
+           required>
+
+    <br><br>
+
+    <label>Email:</label>
+    <input type="email"
+           th:field="*{email}"
+           required>
+
+    <br><br>
+
+    <label>Telefonnummer:</label>
+    <input type="text"
+           th:field="*{phoneNumber}"
+           required>
+
+    <br><br>
+
+    <button type="submit">
+        Spara kund
+    </button>
+
+</form>
+
+<hr>
+
+<h2>Alla kunder</h2>
+
+<table>
+
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Namn</th>
+        <th>Email</th>
+        <th>Telefonnummer</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr th:each="customer : ${customers}">
+
+        <td th:text="${customer.id}"></td>
+
+        <td th:text="${customer.name}"></td>
+
+        <td th:text="${customer.email}"></td>
+
+        <td th:text="${customer.phoneNumber}"></td>
+
+    </tr>
+
+    </tbody>
+
+</table>
+
+</body>
+</html>

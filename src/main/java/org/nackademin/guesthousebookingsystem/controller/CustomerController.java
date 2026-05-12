@@ -22,26 +22,27 @@ public class CustomerController {
                 customerService.getAllCustomers()
         );
 
-        return "customers/list";
-    }
-
-    @GetMapping("/new")
-    public String createCustomerForm(Model model) {
-
         model.addAttribute(
                 "customer",
                 new Customer()
         );
 
-        return "customers/create";
+        return "customers/list";
     }
 
-    @PostMapping
-    public String createCustomer(
-            @ModelAttribute Customer customer) {
+    @PostMapping("/save")
+    public String saveCustomer(
+            @ModelAttribute Customer customer
+    ) {
 
         customerService.saveCustomer(customer);
 
         return "redirect:/customers";
+    }
+
+    @GetMapping("/ping")
+    @ResponseBody
+    public String ping() {
+        return "WORKING";
     }
 }
