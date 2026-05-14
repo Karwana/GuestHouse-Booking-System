@@ -1,6 +1,7 @@
 package org.nackademin.guesthousebookingsystem.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.nackademin.guesthousebookingsystem.dto.CustomerDto;
 import org.nackademin.guesthousebookingsystem.entity.Customer;
 import org.nackademin.guesthousebookingsystem.service.CustomerService;
 import org.springframework.stereotype.Controller;
@@ -32,11 +33,9 @@ public class CustomerController {
 
     @PostMapping("/save")
     public String saveCustomer(
-            @ModelAttribute Customer customer
-    ) {
+            @ModelAttribute CustomerDto customerDto) {
 
-        customerService.saveCustomer(customer);
-
+        customerService.saveCustomer(customerDto);
         return "redirect:/customers";
     }
 
