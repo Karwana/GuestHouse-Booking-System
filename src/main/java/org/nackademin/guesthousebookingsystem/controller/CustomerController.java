@@ -25,7 +25,7 @@ public class CustomerController {
 
         model.addAttribute(
                 "customer",
-                new Customer()
+                new CustomerDto()
         );
 
         return "customers/list";

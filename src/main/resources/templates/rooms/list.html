@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Rum</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 10px; }
+        form { margin-bottom: 40px; }
+    </style>
+</head>
+<body>
+
+<h1>Rumshantering</h1>
+
+<h2>Lägg till rum</h2>
+
+<form th:action="@{/rooms/save}"
+      th:object="${room}"
+      method="post">
+
+    <label>Rumsnummer:</label>
+    <input type="number" th:field="*{roomNumber}" required>
+
+    <br><br>
+
+    <label>Rumstyp:</label>
+    <select th:field="*{roomType}">
+        <option value="SINGLE">Enkelrum</option>
+        <option value="DOUBLE">Dubbelrum</option>
+    </select>
+
+    <br><br>
+
+    <label>Extrasängar:</label>
+    <select th:field="*{extraBeds}">
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Spara rum</button>
+
+</form>
+
+<hr>
+
+<h2>Alla rum</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Rumsnummer</th>
+        <th>Typ</th>
+        <th>Extrasängar</th>
+        <th>Åtgärd</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="r : ${rooms}">
+        <td th:text="${r.id}"></td>
+        <td th:text="${r.roomNumber}"></td>
+        <td th:text="${r.roomType}"></td>
+        <td th:text="${r.extraBeds}"></td>
+        <td>
+            <a th:href="@{/rooms/delete/{id}(id=${r.id})}">Ta bort</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

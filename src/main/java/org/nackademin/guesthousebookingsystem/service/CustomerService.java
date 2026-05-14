@@ -1,7 +1,6 @@
 package org.nackademin.guesthousebookingsystem.service;
 
 import org.nackademin.guesthousebookingsystem.dto.CustomerDto;
-import org.nackademin.guesthousebookingsystem.entity.Customer;
 
 import java.util.List;
 
