@@ -2,33 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Kunder</title>
-
     <style>
-
-        body{
-            font-family: Arial;
-            margin: 40px;
-        }
-
-        table{
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        table, th, td{
-            border: 1px solid black;
-        }
-
-        th, td{
-            padding: 10px;
-        }
-
-        form{
-            margin-bottom: 40px;
-        }
-
+        body { font-family: Arial; margin: 40px; }
+        table { border-collapse: collapse; width: 100%; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 10px; }
+        form { margin-bottom: 40px; }
     </style>
-
 </head>
 <body>
 
@@ -41,29 +21,18 @@
       method="post">
 
     <label>Namn:</label>
-    <input type="text"
-           th:field="*{name}"
-           required>
-
+    <input type="text" th:field="*{name}" required>
     <br><br>
 
     <label>Email:</label>
-    <input type="email"
-           th:field="*{email}"
-           required>
-
+    <input type="email" th:field="*{email}" required>
     <br><br>
 
     <label>Telefonnummer:</label>
-    <input type="text"
-           th:field="*{phoneNumber}"
-           required>
-
+    <input type="text" th:field="*{phoneNumber}" required>
     <br><br>
 
-    <button type="submit">
-        Spara kund
-    </button>
+    <button type="submit">Spara kund</button>
 
 </form>
 
@@ -72,32 +41,27 @@
 <h2>Alla kunder</h2>
 
 <table>
-
     <thead>
     <tr>
         <th>ID</th>
         <th>Namn</th>
         <th>Email</th>
         <th>Telefonnummer</th>
+        <th>Hantera</th>
     </tr>
     </thead>
-
     <tbody>
-
-    <tr th:each="customer : ${customers}">
-
-        <td th:text="${customer.id}"></td>
-
-        <td th:text="${customer.name}"></td>
-
-        <td th:text="${customer.email}"></td>
-
-        <td th:text="${customer.phoneNumber}"></td>
-
+    <tr th:each="c : ${customers}">
+        <td th:text="${c.id}"></td>
+        <td th:text="${c.name}"></td>
+        <td th:text="${c.email}"></td>
+        <td th:text="${c.phoneNumber}"></td>
+        <td>
+            <a th:href="@{/customers/edit/{id}(id=${c.id})}">Redigera</a>
+            <a th:href="@{/customers/delete/{id}(id=${c.id})}">Ta bort</a>
+        </td>
     </tr>
-
     </tbody>
-
 </table>
 
 </body>
