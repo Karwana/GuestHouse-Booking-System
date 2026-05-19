@@ -1,0 +1,100 @@
+package org.nackademin.guesthousebookingsystem.controller;
+
+import lombok.RequiredArgsConstructor;
+import org.nackademin.guesthousebookingsystem.dto.BookingDto;
+import org.nackademin.guesthousebookingsystem.dto.CustomerDto;
+import org.nackademin.guesthousebookingsystem.dto.RoomDto;
+import org.nackademin.guesthousebookingsystem.service.BookingService;
+import org.nackademin.guesthousebookingsystem.service.CustomerService;
+import org.nackademin.guesthousebookingsystem.service.RoomService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+@Controller
+@RequestMapping("/bookings")
+@RequiredArgsConstructor
+public class BookingController {
+
+    private final BookingService bookingService;
+    private final CustomerService customerService;
+    private final RoomService roomService;
+
+    private void populateModel(Model model) {
+        model.addAttribute("bookings", bookingService.getAllBookings());
+        model.addAttribute("customers", customerService.getAllCustomers());
+        model.addAttribute("rooms", roomService.getAllRooms());
+    }
+
+    @GetMapping
+    public String getBookings(Model model) {
+
+        populateModel(model);
+
+        BookingDto booking = new BookingDto();
+        booking.setCustomer(new CustomerDto());
+        booking.setRoom(new RoomDto());
+
+        model.addAttribute("booking", booking);
+
+
+        model.addAttribute("editMode", false);
+
+        return "bookings/list";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editBooking(@PathVariable Long id, Model model) {
+
+        populateModel(model);
+
+        model.addAttribute("booking", bookingService.getBookingById(id));
+        model.addAttribute("editMode", true);
+
+        return "bookings/list";
+    }
+
+    @PostMapping("/save")
+    public String saveBooking(
+            @ModelAttribute BookingDto bookingDto,
+            RedirectAttributes ra) {
+
+        try {
+            bookingService.saveBooking(bookingDto);
+            ra.addFlashAttribute("success", "Bokning sparad!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/bookings";
+    }
+
+    @PostMapping("/update/{id}")
+    public String updateBooking(
+            @PathVariable Long id,
+            @ModelAttribute BookingDto bookingDto,
+            RedirectAttributes ra) {
+
+        try {
+            bookingService.updateBooking(id, bookingDto);
+            ra.addFlashAttribute("success", "Bokning uppdaterad!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/bookings";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteBooking(
+            @PathVariable Long id,
+            RedirectAttributes ra) {
+
+        bookingService.deleteBooking(id);
+
+        ra.addFlashAttribute("success", "Bokning avbokad.");
+
+        return "redirect:/bookings";
+    }
+}
