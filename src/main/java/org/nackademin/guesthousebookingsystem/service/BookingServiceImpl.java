@@ -46,9 +46,9 @@ public class BookingServiceImpl implements BookingService {
 
     private Booking toEntity(BookingDto dto) {
         Customer customer = customerRepository.findById(dto.getCustomer().getId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new RuntimeException("Kund hittades inte"));
         Room room = roomRepository.findById(dto.getRoom().getId())
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+                .orElseThrow(() -> new RuntimeException("Rum hittades inte"));
         return new Booking(
                 dto.getId(),
                 customer,
@@ -56,6 +56,26 @@ public class BookingServiceImpl implements BookingService {
                 dto.getStartDate(),
                 dto.getEndDate()
         );
+    }
+
+    private void checkConflicts(BookingDto dto, Long excludeId) {
+        if (dto.getStartDate() == null || dto.getEndDate() == null) {
+            throw new IllegalArgumentException("Datum saknas");
+        }
+        if (!dto.getEndDate().isAfter(dto.getStartDate())) {
+            throw new IllegalArgumentException(
+                    "Utcheckningsdatum måste vara efter incheckningsdatum");
+        }
+        List<Booking> conflicts = bookingRepository.findOverlapping(
+                dto.getRoom().getId(),
+                dto.getStartDate(),
+                dto.getEndDate(),
+                excludeId
+        );
+        if (!conflicts.isEmpty()) {
+            throw new IllegalStateException(
+                    "Rummet är redan bokat för de valda datumen");
+        }
     }
 
     @Override
@@ -70,11 +90,12 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(Long id) {
         return bookingRepository.findById(id)
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .orElseThrow(() -> new RuntimeException("Bokning hittades inte"));
     }
 
     @Override
     public BookingDto saveBooking(BookingDto bookingDto) {
+        checkConflicts(bookingDto, -1L);
         Booking saved = bookingRepository.save(toEntity(bookingDto));
         return toDto(saved);
     }
@@ -82,6 +103,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto updateBooking(Long id, BookingDto bookingDto) {
         bookingDto.setId(id);
+        checkConflicts(bookingDto, id);
         Booking saved = bookingRepository.save(toEntity(bookingDto));
         return toDto(saved);
     }
