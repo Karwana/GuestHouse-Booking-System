@@ -3,6 +3,7 @@ package org.nackademin.guesthousebookingsystem.service;
 import lombok.RequiredArgsConstructor;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.entity.Room;
+import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
 import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
+    private final BookingRepository bookingRepository;
 
     private RoomDto toDto(Room room) {
         return new RoomDto(
@@ -44,7 +46,7 @@ public class RoomServiceImpl implements RoomService {
     public RoomDto getRoomById(Long id) {
         return roomRepository.findById(id)
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+                .orElseThrow(() -> new RuntimeException("Rum hittades inte"));
     }
 
     @Override
@@ -62,6 +64,14 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void deleteRoom(Long id) {
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rum hittades inte"));
+
+        if (!bookingRepository.findByRoom(room).isEmpty()) {
+            throw new IllegalStateException(
+                    "Kan inte ta bort rum — det finns bokningar kopplade till rummet");
+        }
+
         roomRepository.deleteById(id);
     }
 }
