@@ -3,6 +3,7 @@ package org.nackademin.guesthousebookingsystem.service;
 import lombok.RequiredArgsConstructor;
 import org.nackademin.guesthousebookingsystem.dto.CustomerDto;
 import org.nackademin.guesthousebookingsystem.entity.Customer;
+import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
 import org.nackademin.guesthousebookingsystem.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final BookingRepository bookingRepository;
 
     private CustomerDto toDto(Customer customer) {
         return new CustomerDto(
@@ -44,7 +46,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDto getCustomerById(Long id) {
         return customerRepository.findById(id)
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new RuntimeException("Kund hittades inte"));
     }
 
     @Override
@@ -62,6 +64,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void deleteCustomer(Long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kund hittades inte"));
+
+        if (!bookingRepository.findByCustomer(customer).isEmpty()) {
+            throw new IllegalStateException(
+                    "Kan inte ta bort kund — det finns aktiva bokningar kopplade till kunden");
+        }
+
         customerRepository.deleteById(id);
     }
 }
