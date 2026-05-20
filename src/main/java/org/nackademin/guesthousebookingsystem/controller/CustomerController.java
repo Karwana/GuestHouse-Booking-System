@@ -6,6 +6,7 @@ import org.nackademin.guesthousebookingsystem.service.CustomerService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/customers")
@@ -16,26 +17,9 @@ public class CustomerController {
 
     @GetMapping
     public String getCustomers(Model model) {
-
-        model.addAttribute(
-                "customers",
-                customerService.getAllCustomers()
-        );
-
-        model.addAttribute(
-                "customer",
-                new CustomerDto()
-        );
-
+        model.addAttribute("customers", customerService.getAllCustomers());
+        model.addAttribute("customer", new CustomerDto());
         return "customers/list";
-    }
-
-    @PostMapping("/save")
-    public String saveCustomer(
-            @ModelAttribute CustomerDto customerDto) {
-
-        customerService.saveCustomer(customerDto);
-        return "redirect:/customers";
     }
 
     @GetMapping("/edit/{id}")
@@ -44,22 +28,35 @@ public class CustomerController {
         return "customers/edit";
     }
 
+    @PostMapping("/save")
+    public String saveCustomer(
+            @ModelAttribute CustomerDto customerDto,
+            RedirectAttributes ra) {
+        customerService.saveCustomer(customerDto);
+        ra.addFlashAttribute("success", "Kunden sparades!");
+        return "redirect:/customers";
+    }
+
     @PostMapping("/update/{id}")
-    public String updateCustomer(@PathVariable Long id,
-                                 @ModelAttribute CustomerDto customerDto) {
+    public String updateCustomer(
+            @PathVariable Long id,
+            @ModelAttribute CustomerDto customerDto,
+            RedirectAttributes ra) {
         customerService.updateCustomer(id, customerDto);
+        ra.addFlashAttribute("success", "Kunden uppdaterades!");
         return "redirect:/customers";
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteCustomer(@PathVariable Long id) {
-        customerService.deleteCustomer(id);
+    public String deleteCustomer(
+            @PathVariable Long id,
+            RedirectAttributes ra) {
+        try {
+            customerService.deleteCustomer(id);
+            ra.addFlashAttribute("success", "Kunden togs bort.");
+        } catch (IllegalStateException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/customers";
-    }
-
-    @GetMapping("/ping")
-    @ResponseBody
-    public String ping() {
-        return "WORKING";
     }
 }
