@@ -11,35 +11,118 @@
 
 <body>
 
-<div class="container mt-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
 
-    <h1>GuestHouse Booking System</h1>
+        <a class="navbar-brand" th:href="@{/}">
+            GuestHouse
+        </a>
 
-    <hr>
+        <div class="navbar-nav">
+            <a class="nav-link active" th:href="@{/}">
+                Startsida
+            </a>
 
-    <h3>Meny</h3>
-
-    <ul class="list-group">
-
-        <li class="list-group-item">
-            <a th:href="@{/customers}">
+            <a class="nav-link" th:href="@{/customers}">
                 Kunder
             </a>
-        </li>
 
-        <li class="list-group-item">
-            <a th:href="@{/rooms}">
+            <a class="nav-link" th:href="@{/rooms}">
                 Rum
             </a>
-        </li>
 
-        <li class="list-group-item">
-            <a th:href="@{/bookings}">
+            <a class="nav-link" th:href="@{/bookings}">
                 Bokningar
             </a>
-        </li>
+        </div>
 
-    </ul>
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <div class="text-center mb-5">
+
+        <h1>GuestHouse Booking System</h1>
+
+        <p class="text-muted">
+            Hantera kunder, rum och bokningar
+        </p>
+
+    </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-3">
+
+            <div class="card mb-4">
+
+                <div class="card-body text-center">
+
+                    <h4>Kunder</h4>
+
+                    <p>
+                        Registrera och hantera kunder.
+                    </p>
+
+                    <a th:href="@{/customers}"
+                       class="btn btn-primary">
+                        Gå till kunder
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card mb-4">
+
+                <div class="card-body text-center">
+
+                    <h4>Rum</h4>
+
+                    <p>
+                        Lägg till och hantera rum.
+                    </p>
+
+                    <a th:href="@{/rooms}"
+                       class="btn btn-primary">
+                        Gå till rum
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card mb-4">
+
+                <div class="card-body text-center">
+
+                    <h4>Bokningar</h4>
+
+                    <p>
+                        Skapa och hantera bokningar.
+                    </p>
+
+                    <a th:href="@{/bookings}"
+                       class="btn btn-primary">
+                        Gå till bokningar
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 

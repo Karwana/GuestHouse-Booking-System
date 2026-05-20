@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="sv">
+
 <head>
     <meta charset="UTF-8">
     <title>Bokningar</title>
@@ -10,21 +11,42 @@
 
 <body>
 
+<!-- HEADER -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+        <a class="navbar-brand" th:href="@{/}">
+            GuestHouse
+        </a>
+
+        <div class="navbar-nav">
+            <a class="nav-link" th:href="@{/}">
+                Startsida
+            </a>
+
+            <a class="nav-link" th:href="@{/customers}">
+                Kunder
+            </a>
+
+            <a class="nav-link" th:href="@{/rooms}">
+                Rum
+            </a>
+
+            <a class="nav-link active" th:href="@{/bookings}">
+                Bokningar
+            </a>
+        </div>
+
+    </div>
+</nav>
+
 <div class="container mt-4">
 
     <h1 class="mb-4">Bokningar</h1>
 
-    <div class="mb-3">
-        <a th:href="@{/}" class="btn btn-secondary btn-sm">Startsida</a>
-        <a th:href="@{/customers}" class="btn btn-secondary btn-sm">Kunder</a>
-        <a th:href="@{/rooms}" class="btn btn-secondary btn-sm">Rum</a>
-    </div>
-
-
     <div th:if="${success}" class="alert alert-success">
         <span th:text="${success}"></span>
     </div>
-
 
     <div th:if="${error}" class="alert alert-danger">
         <span th:text="${error}"></span>
@@ -32,184 +54,214 @@
 
     <div class="row">
 
-
         <div class="col-md-4">
 
-            <h3 th:if="${editMode} == false">Ny bokning</h3>
-            <h3 th:if="${editMode} == true">Redigera bokning</h3>
+            <div class="card p-4">
 
+                <h3 th:if="${editMode} == false">
+                    Ny bokning
+                </h3>
 
-            <form th:if="${editMode} == false"
-                  th:action="@{/bookings/save}"
-                  th:object="${booking}"
-                  method="post">
+                <h3 th:if="${editMode} == true">
+                    Redigera bokning
+                </h3>
 
-                <div class="mb-3">
-                    <label>Kund</label>
+                <form th:if="${editMode} == false"
+                      th:action="@{/bookings/save}"
+                      th:object="${booking}"
+                      method="post">
 
-                    <select class="form-control"
-                            th:field="*{customer.id}">
+                    <div class="mb-3">
 
-                        <option value="">Välj kund</option>
+                        <label>Kund</label>
 
-                        <option th:each="c : ${customers}"
-                                th:value="${c.id}"
-                                th:text="${c.name}">
-                        </option>
+                        <select class="form-control"
+                                th:field="*{customer.id}">
 
-                    </select>
-                </div>
+                            <option value="">
+                                Välj kund
+                            </option>
 
-                <div class="mb-3">
-                    <label>Rum</label>
+                            <option th:each="c : ${customers}"
+                                    th:value="${c.id}"
+                                    th:text="${c.name}">
+                            </option>
 
-                    <select class="form-control"
-                            th:field="*{room.id}">
+                        </select>
 
-                        <option value="">Välj rum</option>
+                    </div>
 
-                        <option th:each="r : ${rooms}"
-                                th:value="${r.id}"
-                                th:text="'Rum ' + ${r.roomNumber}">
-                        </option>
+                    <div class="mb-3">
 
-                    </select>
-                </div>
+                        <label>Rum</label>
 
-                <div class="mb-3">
-                    <label>Startdatum</label>
+                        <select class="form-control"
+                                th:field="*{room.id}">
 
-                    <input type="date"
-                           class="form-control"
-                           th:field="*{startDate}">
-                </div>
+                            <option value="">
+                                Välj rum
+                            </option>
 
-                <div class="mb-3">
-                    <label>Slutdatum</label>
+                            <option th:each="r : ${rooms}"
+                                    th:value="${r.id}"
+                                    th:text="'Rum ' + ${r.roomNumber}">
+                            </option>
 
-                    <input type="date"
-                           class="form-control"
-                           th:field="*{endDate}">
-                </div>
+                        </select>
 
-                <button type="submit"
-                        class="btn btn-primary">
-                    Spara
-                </button>
+                    </div>
 
-            </form>
+                    <div class="mb-3">
 
-            <form th:if="${editMode} == true"
-                  th:action="@{/bookings/update/{id}(id=${booking.id})}"
-                  th:object="${booking}"
-                  method="post">
+                        <label>Startdatum</label>
 
-                <div class="mb-3">
-                    <label>Kund</label>
+                        <input type="date"
+                               class="form-control"
+                               th:field="*{startDate}">
 
-                    <select class="form-control"
-                            th:field="*{customer.id}">
+                    </div>
 
-                        <option th:each="c : ${customers}"
-                                th:value="${c.id}"
-                                th:text="${c.name}">
-                        </option>
+                    <div class="mb-3">
 
-                    </select>
-                </div>
+                        <label>Slutdatum</label>
 
-                <div class="mb-3">
-                    <label>Rum</label>
+                        <input type="date"
+                               class="form-control"
+                               th:field="*{endDate}">
 
-                    <select class="form-control"
-                            th:field="*{room.id}">
+                    </div>
 
-                        <option th:each="r : ${rooms}"
-                                th:value="${r.id}"
-                                th:text="'Rum ' + ${r.roomNumber}">
-                        </option>
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Spara
+                    </button>
 
-                    </select>
-                </div>
+                </form>
 
-                <div class="mb-3">
-                    <label>Startdatum</label>
+                <form th:if="${editMode} == true"
+                      th:action="@{/bookings/update/{id}(id=${booking.id})}"
+                      th:object="${booking}"
+                      method="post">
 
-                    <input type="date"
-                           class="form-control"
-                           th:field="*{startDate}">
-                </div>
+                    <div class="mb-3">
 
-                <div class="mb-3">
-                    <label>Slutdatum</label>
+                        <label>Kund</label>
 
-                    <input type="date"
-                           class="form-control"
-                           th:field="*{endDate}">
-                </div>
+                        <select class="form-control"
+                                th:field="*{customer.id}">
 
-                <button type="submit"
-                        class="btn btn-warning">
-                    Uppdatera
-                </button>
+                            <option th:each="c : ${customers}"
+                                    th:value="${c.id}"
+                                    th:text="${c.name}">
+                            </option>
 
-                <a th:href="@{/bookings}"
-                   class="btn btn-secondary">
-                    Avbryt
-                </a>
+                        </select>
 
-            </form>
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label>Rum</label>
+
+                        <select class="form-control"
+                                th:field="*{room.id}">
+
+                            <option th:each="r : ${rooms}"
+                                    th:value="${r.id}"
+                                    th:text="'Rum ' + ${r.roomNumber}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label>Startdatum</label>
+
+                        <input type="date"
+                               class="form-control"
+                               th:field="*{startDate}">
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label>Slutdatum</label>
+
+                        <input type="date"
+                               class="form-control"
+                               th:field="*{endDate}">
+
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-warning">
+                        Update
+                    </button>
+
+                    <a th:href="@{/bookings}"
+                       class="btn btn-secondary">
+                        Avbryt
+                    </a>
+
+                </form>
+
+            </div>
 
         </div>
 
-
         <div class="col-md-8">
 
-            <h3>Alla bokningar</h3>
+            <div class="card p-4">
 
-            <table class="table table-bordered">
+                <h3 class="mb-3">Alla bokningar</h3>
 
-                <thead>
-                <tr>
-                    <th>Kund</th>
-                    <th>Rum</th>
-                    <th>Start</th>
-                    <th>Slut</th>
-                    <th>Åtgärder</th>
-                </tr>
-                </thead>
+                <table class="table table-bordered">
 
-                <tbody>
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Kund</th>
+                        <th>Rum</th>
+                        <th>Start</th>
+                        <th>Slut</th>
+                        <th>Åtgärder</th>
+                    </tr>
+                    </thead>
 
-                <tr th:each="b : ${bookings}">
+                    <tbody>
 
-                    <td th:text="${b.customer.name}"></td>
+                    <tr th:each="b : ${bookings}">
 
-                    <td th:text="${b.room.roomNumber}"></td>
+                        <td th:text="${b.customer.name}"></td>
 
-                    <td th:text="${b.startDate}"></td>
+                        <td th:text="${b.room.roomNumber}"></td>
 
-                    <td th:text="${b.endDate}"></td>
+                        <td th:text="${b.startDate}"></td>
 
-                    <td>
+                        <td th:text="${b.endDate}"></td>
 
-                        <a th:href="@{/bookings/edit/{id}(id=${b.id})}"
-                           class="btn btn-sm btn-primary">
-                            Edit
-                        </a>
+                        <td>
 
-                        <a th:href="@{/bookings/delete/{id}(id=${b.id})}"
-                           class="btn btn-sm btn-danger">
-                            Delete
-                        </a>
+                            <a th:href="@{/bookings/edit/{id}(id=${b.id})}"
+                               class="btn btn-sm btn-primary">
+                                Edit
+                            </a>
 
-                    </td>
+                            <a th:href="@{/bookings/delete/{id}(id=${b.id})}"
+                               class="btn btn-sm btn-danger">
+                                Delete
+                            </a>
 
-                </tr>
+                        </td>
 
-                </tbody>
+                    </tr>
 
-            </table>
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 

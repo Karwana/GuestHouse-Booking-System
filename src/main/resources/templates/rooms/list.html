@@ -1,77 +1,150 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="sv">
+
 <head>
+    <meta charset="UTF-8">
     <title>Rum</title>
-    <style>
-        body { font-family: Arial; margin: 40px; }
-        table { border-collapse: collapse; width: 100%; }
-        table, th, td { border: 1px solid black; }
-        th, td { padding: 10px; }
-        form { margin-bottom: 40px; }
-    </style>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
+
 <body>
 
-<h1>Rumshantering</h1>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
 
-<h2>Lägg till rum</h2>
+        <a class="navbar-brand" th:href="@{/}">
+            GuestHouse
+        </a>
 
-<form th:action="@{/rooms/save}"
-      th:object="${room}"
-      method="post">
+        <div class="navbar-nav">
+            <a class="nav-link" th:href="@{/}">
+                Startsida
+            </a>
 
-    <label>Rumsnummer:</label>
-    <input type="number" th:field="*{roomNumber}" required>
+            <a class="nav-link" th:href="@{/customers}">
+                Kunder
+            </a>
 
-    <br><br>
+            <a class="nav-link active" th:href="@{/rooms}">
+                Rum
+            </a>
 
-    <label>Rumstyp:</label>
-    <select th:field="*{roomType}">
-        <option value="SINGLE">Enkelrum</option>
-        <option value="DOUBLE">Dubbelrum</option>
-    </select>
+            <a class="nav-link" th:href="@{/bookings}">
+                Bokningar
+            </a>
+        </div>
 
-    <br><br>
+    </div>
+</nav>
 
-    <label>Extrasängar:</label>
-    <select th:field="*{extraBeds}">
-        <option value="0">0</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-    </select>
+<div class="container mt-4">
 
-    <br><br>
+    <h1 class="mb-4">Rum</h1>
 
-    <button type="submit">Spara rum</button>
+    <div class="card p-4 mb-4">
 
-</form>
+        <h3>Lägg till rum</h3>
 
-<hr>
+        <form th:action="@{/rooms/save}"
+              th:object="${room}"
+              method="post">
 
-<h2>Alla rum</h2>
+            <div class="mb-3">
+                <label>Rumsnummer</label>
 
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Rumsnummer</th>
-        <th>Typ</th>
-        <th>Extrasängar</th>
-        <th>Åtgärd</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="r : ${rooms}">
-        <td th:text="${r.id}"></td>
-        <td th:text="${r.roomNumber}"></td>
-        <td th:text="${r.roomType}"></td>
-        <td th:text="${r.extraBeds}"></td>
-        <td>
-            <a th:href="@{/rooms/delete/{id}(id=${r.id})}">Ta bort</a>
-        </td>
-    </tr>
-    </tbody>
-</table>
+                <input type="number"
+                       class="form-control"
+                       th:field="*{roomNumber}"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label>Rumstyp</label>
+
+                <select class="form-control"
+                        th:field="*{roomType}">
+
+                    <option value="SINGLE">
+                        Enkelrum
+                    </option>
+
+                    <option value="DOUBLE">
+                        Dubbelrum
+                    </option>
+
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label>Extrasängar</label>
+
+                <select class="form-control"
+                        th:field="*{extraBeds}">
+
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+
+                </select>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Spara rum
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="card p-4">
+
+        <h3 class="mb-3">Alla rum</h3>
+
+        <table class="table table-bordered">
+
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Rumsnummer</th>
+                <th>Typ</th>
+                <th>Extrasängar</th>
+                <th>Åtgärd</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="r : ${rooms}">
+
+                <td th:text="${r.id}"></td>
+
+                <td th:text="${r.roomNumber}"></td>
+
+                <td th:text="${r.roomType}"></td>
+
+                <td th:text="${r.extraBeds}"></td>
+
+                <td>
+
+                    <a th:href="@{/rooms/delete/{id}(id=${r.id})}"
+                       class="btn btn-sm btn-danger">
+                        Delete
+                    </a>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 </body>
 </html>
