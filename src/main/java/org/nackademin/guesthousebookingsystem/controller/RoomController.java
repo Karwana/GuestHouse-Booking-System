@@ -18,18 +18,54 @@ public class RoomController {
 
     @GetMapping
     public String getRooms(Model model) {
-        model.addAttribute("rooms", roomService.getAllRooms());
-        model.addAttribute("room", new RoomDto());
-        model.addAttribute("roomTypes", RoomType.values());
+
+        model.addAttribute(
+                "rooms",
+                roomService.getAllRooms()
+        );
+
+        model.addAttribute(
+                "room",
+                new RoomDto()
+        );
+
+        model.addAttribute(
+                "roomTypes",
+                RoomType.values()
+        );
+
+        model.addAttribute(
+                "editMode",
+                false
+        );
+
         return "rooms/list";
     }
 
     @GetMapping("/edit/{id}")
-    public String editRoom(@PathVariable Long id, Model model) {
-        model.addAttribute("room", roomService.getRoomById(id));
-        model.addAttribute("rooms", roomService.getAllRooms());
-        model.addAttribute("roomTypes", RoomType.values());
-        model.addAttribute("editMode", true);
+    public String editRoom(@PathVariable Long id,
+                           Model model) {
+
+        model.addAttribute(
+                "rooms",
+                roomService.getAllRooms()
+        );
+
+        model.addAttribute(
+                "room",
+                roomService.getRoomById(id)
+        );
+
+        model.addAttribute(
+                "roomTypes",
+                RoomType.values()
+        );
+
+        model.addAttribute(
+                "editMode",
+                true
+        );
+
         return "rooms/list";
     }
 
@@ -37,8 +73,24 @@ public class RoomController {
     public String saveRoom(
             @ModelAttribute RoomDto roomDto,
             RedirectAttributes ra) {
-        roomService.saveRoom(roomDto);
-        ra.addFlashAttribute("success", "Rum " + roomDto.getRoomNumber() + " sparades!");
+
+        try {
+
+            roomService.saveRoom(roomDto);
+
+            ra.addFlashAttribute(
+                    "success",
+                    "Rum " + roomDto.getRoomNumber() + " sparades!"
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            ra.addFlashAttribute(
+                    "error",
+                    e.getMessage()
+            );
+        }
+
         return "redirect:/rooms";
     }
 
@@ -47,8 +99,14 @@ public class RoomController {
             @PathVariable Long id,
             @ModelAttribute RoomDto roomDto,
             RedirectAttributes ra) {
+
         roomService.updateRoom(id, roomDto);
-        ra.addFlashAttribute("success", "Rummet uppdaterades!");
+
+        ra.addFlashAttribute(
+                "success",
+                "Rummet uppdaterades!"
+        );
+
         return "redirect:/rooms";
     }
 
@@ -56,12 +114,24 @@ public class RoomController {
     public String deleteRoom(
             @PathVariable Long id,
             RedirectAttributes ra) {
+
         try {
+
             roomService.deleteRoom(id);
-            ra.addFlashAttribute("success", "Rummet togs bort.");
+
+            ra.addFlashAttribute(
+                    "success",
+                    "Rummet togs bort."
+            );
+
         } catch (IllegalStateException e) {
-            ra.addFlashAttribute("error", e.getMessage());
+
+            ra.addFlashAttribute(
+                    "error",
+                    e.getMessage()
+            );
         }
+
         return "redirect:/rooms";
     }
 }

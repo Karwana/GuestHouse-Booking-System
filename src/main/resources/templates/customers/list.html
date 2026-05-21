@@ -12,6 +12,7 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
     <div class="container">
 
         <a class="navbar-brand" th:href="@{/}">
@@ -19,6 +20,7 @@
         </a>
 
         <div class="navbar-nav">
+
             <a class="nav-link" th:href="@{/}">
                 Startsida
             </a>
@@ -34,110 +36,182 @@
             <a class="nav-link" th:href="@{/bookings}">
                 Bokningar
             </a>
+
         </div>
 
     </div>
+
 </nav>
 
 <div class="container mt-4">
 
-    <h1 class="mb-4">Kunder</h1>
+    <h1 class="mb-4">
+        Kunder
+    </h1>
 
-    <div class="card p-4 mb-4">
+    <div th:if="${success}"
+         class="alert alert-success alert-dismissible fade show">
 
-        <h3>Lägg till kund</h3>
+        <span th:text="${success}"></span>
 
-        <form th:action="@{/customers/save}"
-              th:object="${customer}"
-              method="post">
-
-            <div class="mb-3">
-                <label>Namn</label>
-
-                <input type="text"
-                       class="form-control"
-                       th:field="*{name}"
-                       required>
-            </div>
-
-            <div class="mb-3">
-                <label>Email</label>
-
-                <input type="email"
-                       class="form-control"
-                       th:field="*{email}"
-                       required>
-            </div>
-
-            <div class="mb-3">
-                <label>Telefonnummer</label>
-
-                <input type="text"
-                       class="form-control"
-                       th:field="*{phoneNumber}"
-                       required>
-            </div>
-
-            <button type="submit"
-                    class="btn btn-primary">
-                Spara kund
-            </button>
-
-        </form>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
 
     </div>
 
-    <div class="card p-4">
+    <div th:if="${error}"
+         class="alert alert-danger alert-dismissible fade show">
 
-        <h3 class="mb-3">Alla kunder</h3>
+        <span th:text="${error}"></span>
 
-        <table class="table table-bordered">
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
 
-            <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Namn</th>
-                <th>Email</th>
-                <th>Telefonnummer</th>
-                <th>Hantera</th>
-            </tr>
-            </thead>
+    </div>
 
-            <tbody>
+    <div class="row">
 
-            <tr th:each="c : ${customers}">
+        <div class="col-md-4">
 
-                <td th:text="${c.id}"></td>
+            <div class="card p-4 shadow-sm">
 
-                <td th:text="${c.name}"></td>
+                <h3 th:text="${editMode} ? 'Redigera kund' : 'Lägg till kund'">
+                </h3>
 
-                <td th:text="${c.email}"></td>
+                <form th:action="${editMode} ?
+                      @{/customers/update/{id}(id=${customer.id})} :
+                      @{/customers/save}"
+                      th:object="${customer}"
+                      method="post">
 
-                <td th:text="${c.phoneNumber}"></td>
+                    <div class="mb-3">
 
-                <td>
+                        <label>Namn</label>
 
-                    <a th:href="@{/customers/edit/{id}(id=${c.id})}"
-                       class="btn btn-sm btn-primary">
-                        Edit
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{name}"
+                               required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label>Email</label>
+
+                        <input type="email"
+                               class="form-control"
+                               th:field="*{email}"
+                               required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label>Telefonnummer</label>
+
+                        <input type="text"
+                               class="form-control"
+                               th:field="*{phoneNumber}"
+                               required>
+
+                    </div>
+
+                    <button type="submit"
+                            th:class="${editMode} ?
+                            'btn btn-warning w-100' :
+                            'btn btn-primary w-100'">
+
+                        <span th:text="${editMode} ? 'Uppdatera kund' : 'Spara kund'">
+                        </span>
+
+                    </button>
+
+                    <a th:if="${editMode}"
+                       th:href="@{/customers}"
+                       class="btn btn-secondary w-100 mt-2">
+
+                        Avbryt
                     </a>
 
-                    <a th:href="@{/customers/delete/{id}(id=${c.id})}"
-                       class="btn btn-sm btn-danger">
-                        Delete
-                    </a>
+                </form>
 
-                </td>
+            </div>
 
-            </tr>
+        </div>
 
-            </tbody>
+        <div class="col-md-8">
 
-        </table>
+            <div class="card p-4 shadow-sm">
+
+                <h3 class="mb-3">
+                    Alla kunder
+                </h3>
+
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-dark">
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Namn</th>
+                        <th>Email</th>
+                        <th>Telefonnummer</th>
+                        <th>Hantera</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="c : ${customers}">
+
+                        <td th:text="${c.id}"></td>
+
+                        <td th:text="${c.name}"></td>
+
+                        <td th:text="${c.email}"></td>
+
+                        <td th:text="${c.phoneNumber}"></td>
+
+                        <td>
+
+                            <a th:href="@{/customers/edit/{id}(id=${c.id})}"
+                               class="btn btn-sm btn-primary">
+
+                                Edit
+                            </a>
+
+                            <a th:href="@{/customers/delete/{id}(id=${c.id})}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Är du säker på att du vill ta bort kunden?')">
+
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
 
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

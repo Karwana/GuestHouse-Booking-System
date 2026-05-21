@@ -17,6 +17,7 @@ public class RoomServiceImpl implements RoomService {
     private final BookingRepository bookingRepository;
 
     private RoomDto toDto(Room room) {
+
         return new RoomDto(
                 room.getId(),
                 room.getRoomNumber(),
@@ -26,6 +27,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     private Room toEntity(RoomDto dto) {
+
         return new Room(
                 dto.getId(),
                 dto.getRoomNumber(),
@@ -36,6 +38,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<RoomDto> getAllRooms() {
+
         return roomRepository.findAll()
                 .stream()
                 .map(this::toDto)
@@ -44,32 +47,63 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomDto getRoomById(Long id) {
+
         return roomRepository.findById(id)
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Rum hittades inte"));
+                .orElseThrow(() ->
+                        new RuntimeException("Rum hittades inte"));
     }
 
     @Override
     public RoomDto saveRoom(RoomDto roomDto) {
-        Room saved = roomRepository.save(toEntity(roomDto));
+
+        if (roomDto.getRoomNumber() < 1) {
+
+            throw new IllegalArgumentException(
+                    "Rumsnummer måste vara större än 0."
+            );
+        }
+
+        if (roomRepository.existsByRoomNumber(
+                roomDto.getRoomNumber())) {
+
+            throw new IllegalArgumentException(
+                    "Rumsnummer finns redan."
+            );
+        }
+
+        Room saved = roomRepository.save(
+                toEntity(roomDto)
+        );
+
         return toDto(saved);
     }
 
     @Override
-    public RoomDto updateRoom(Long id, RoomDto roomDto) {
+    public RoomDto updateRoom(Long id,
+                              RoomDto roomDto) {
+
         roomDto.setId(id);
-        Room saved = roomRepository.save(toEntity(roomDto));
+
+        Room saved = roomRepository.save(
+                toEntity(roomDto)
+        );
+
         return toDto(saved);
     }
 
     @Override
     public void deleteRoom(Long id) {
+
         Room room = roomRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rum hittades inte"));
+                .orElseThrow(() ->
+                        new RuntimeException("Rum hittades inte"));
 
         if (!bookingRepository.findByRoom(room).isEmpty()) {
+
             throw new IllegalStateException(
-                    "Kan inte ta bort rum — det finns bokningar kopplade till rummet");
+                    "Kan inte ta bort rum — det finns bokningar kopplade till rummet"
+            );
         }
 
         roomRepository.deleteById(id);

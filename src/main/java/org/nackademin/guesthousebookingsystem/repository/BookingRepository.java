@@ -19,15 +19,15 @@ public interface BookingRepository
 
     @Query("""
         SELECT b FROM Booking b
-        WHERE b.room.id   = :roomId
-        AND   b.startDate  < :endDate
-        AND   b.endDate    > :startDate
-        AND   b.id        != :excludeId
+        WHERE b.room.id = :roomId
+        AND b.startDate < :endDate
+        AND b.endDate > :startDate
+        AND b.id != :excludeId
     """)
     List<Booking> findOverlapping(
-            @Param("roomId")    Long roomId,
+            @Param("roomId") Long roomId,
             @Param("startDate") LocalDate startDate,
-            @Param("endDate")   LocalDate endDate,
+            @Param("endDate") LocalDate endDate,
             @Param("excludeId") Long excludeId
     );
 }

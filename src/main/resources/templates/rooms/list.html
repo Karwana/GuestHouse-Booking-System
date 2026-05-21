@@ -12,6 +12,7 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
     <div class="container">
 
         <a class="navbar-brand" th:href="@{/}">
@@ -19,6 +20,7 @@
         </a>
 
         <div class="navbar-nav">
+
             <a class="nav-link" th:href="@{/}">
                 Startsida
             </a>
@@ -34,116 +36,192 @@
             <a class="nav-link" th:href="@{/bookings}">
                 Bokningar
             </a>
+
         </div>
 
     </div>
+
 </nav>
 
 <div class="container mt-4">
 
-    <h1 class="mb-4">Rum</h1>
+    <h1 class="mb-4">
+        Rum
+    </h1>
 
-    <div class="card p-4 mb-4">
+    <div th:if="${success}"
+         class="alert alert-success alert-dismissible fade show">
 
-        <h3>Lägg till rum</h3>
+        <span th:text="${success}"></span>
 
-        <form th:action="@{/rooms/save}"
-              th:object="${room}"
-              method="post">
-
-            <div class="mb-3">
-                <label>Rumsnummer</label>
-
-                <input type="number"
-                       class="form-control"
-                       th:field="*{roomNumber}" min="1" required />
-            </div>
-
-            <div class="mb-3">
-                <label>Rumstyp</label>
-
-                <select class="form-control"
-                        th:field="*{roomType}">
-
-                    <option value="SINGLE">
-                        Enkelrum
-                    </option>
-
-                    <option value="DOUBLE">
-                        Dubbelrum
-                    </option>
-
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label>Extrasängar</label>
-
-                <select class="form-control"
-                        th:field="*{extraBeds}">
-
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-
-                </select>
-            </div>
-
-            <button type="submit"
-                    class="btn btn-primary">
-                Spara rum
-            </button>
-
-        </form>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
 
     </div>
 
-    <div class="card p-4">
+    <div th:if="${error}"
+         class="alert alert-danger alert-dismissible fade show">
 
-        <h3 class="mb-3">Alla rum</h3>
+        <span th:text="${error}"></span>
 
-        <table class="table table-bordered">
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
 
-            <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Rumsnummer</th>
-                <th>Typ</th>
-                <th>Extrasängar</th>
-                <th>Åtgärd</th>
-            </tr>
-            </thead>
+    </div>
 
-            <tbody>
+    <div class="row">
 
-            <tr th:each="r : ${rooms}">
+        <div class="col-md-4">
 
-                <td th:text="${r.id}"></td>
+            <div class="card p-4 shadow-sm">
 
-                <td th:text="${r.roomNumber}"></td>
+                <h3 th:text="${editMode} ? 'Redigera rum' : 'Lägg till rum'">
+                </h3>
 
-                <td th:text="${r.roomType}"></td>
+                <form th:action="${editMode} ?
+                      @{/rooms/update/{id}(id=${room.id})} :
+                      @{/rooms/save}"
+                      th:object="${room}"
+                      method="post">
 
-                <td th:text="${r.extraBeds}"></td>
+                    <div class="mb-3">
 
-                <td>
+                        <label>Rumsnummer</label>
 
-                    <a th:href="@{/rooms/delete/{id}(id=${r.id})}"
-                       class="btn btn-sm btn-danger">
-                        Delete
+                        <input type="number"
+                               class="form-control"
+                               th:field="*{roomNumber}"
+                               min="1"
+                               required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label>Rumstyp</label>
+
+                        <select class="form-control"
+                                th:field="*{roomType}">
+
+                            <option th:each="type : ${roomTypes}"
+                                    th:value="${type}"
+                                    th:text="${type}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label>Extrasängar</label>
+
+                        <select class="form-control"
+                                th:field="*{extraBeds}">
+
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+
+                        </select>
+
+                    </div>
+
+                    <button type="submit"
+                            th:class="${editMode} ?
+                            'btn btn-warning w-100' :
+                            'btn btn-primary w-100'">
+
+                        <span th:text="${editMode} ? 'Uppdatera rum' : 'Spara rum'">
+                        </span>
+
+                    </button>
+
+                    <a th:if="${editMode}"
+                       th:href="@{/rooms}"
+                       class="btn btn-secondary w-100 mt-2">
+
+                        Avbryt
                     </a>
 
-                </td>
+                </form>
 
-            </tr>
+            </div>
 
-            </tbody>
+        </div>
 
-        </table>
+        <div class="col-md-8">
+
+            <div class="card p-4 shadow-sm">
+
+                <h3 class="mb-3">
+                    Alla rum
+                </h3>
+
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-dark">
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Rumsnummer</th>
+                        <th>Typ</th>
+                        <th>Extrasängar</th>
+                        <th>Åtgärd</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="r : ${rooms}">
+
+                        <td th:text="${r.id}"></td>
+
+                        <td th:text="${r.roomNumber}"></td>
+
+                        <td th:text="${r.roomType}"></td>
+
+                        <td th:text="${r.extraBeds}"></td>
+
+                        <td>
+
+                            <a th:href="@{/rooms/edit/{id}(id=${r.id})}"
+                               class="btn btn-sm btn-primary">
+
+                                Edit
+                            </a>
+
+                            <a th:href="@{/rooms/delete/{id}(id=${r.id})}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Är du säker på att du vill ta bort rummet?')">
+
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
 
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
