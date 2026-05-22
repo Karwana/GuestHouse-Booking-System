@@ -7,6 +7,7 @@ import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
 import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -58,36 +59,26 @@ public class RoomServiceImpl implements RoomService {
     public RoomDto saveRoom(RoomDto roomDto) {
 
         if (roomDto.getRoomNumber() < 1) {
-
             throw new IllegalArgumentException(
-                    "Rumsnummer måste vara större än 0."
-            );
+                    "Rumsnummer måste vara större än 0.");
         }
 
-        if (roomRepository.existsByRoomNumber(
-                roomDto.getRoomNumber())) {
-
+        if (roomRepository.existsByRoomNumber(roomDto.getRoomNumber())) {
             throw new IllegalArgumentException(
-                    "Rumsnummer finns redan."
-            );
+                    "Rumsnummer finns redan.");
         }
 
-        Room saved = roomRepository.save(
-                toEntity(roomDto)
-        );
+        Room saved = roomRepository.save(toEntity(roomDto));
 
         return toDto(saved);
     }
 
     @Override
-    public RoomDto updateRoom(Long id,
-                              RoomDto roomDto) {
+    public RoomDto updateRoom(Long id, RoomDto roomDto) {
 
         roomDto.setId(id);
 
-        Room saved = roomRepository.save(
-                toEntity(roomDto)
-        );
+        Room saved = roomRepository.save(toEntity(roomDto));
 
         return toDto(saved);
     }
@@ -100,12 +91,19 @@ public class RoomServiceImpl implements RoomService {
                         new RuntimeException("Rum hittades inte"));
 
         if (!bookingRepository.findByRoom(room).isEmpty()) {
-
             throw new IllegalStateException(
-                    "Kan inte ta bort rum — det finns bokningar kopplade till rummet"
-            );
+                    "Kan inte ta bort rum — det finns bokningar kopplade till rummet");
         }
 
         roomRepository.deleteById(id);
+    }
+
+    @Override
+    public List<RoomDto> findAvailableRooms(LocalDate startDate, LocalDate endDate, int guests) {
+
+        return roomRepository.findAvailableRooms(startDate, endDate, guests)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 }
