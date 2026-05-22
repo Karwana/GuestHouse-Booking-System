@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.entity.RoomType;
 import org.nackademin.guesthousebookingsystem.service.RoomService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/rooms")
@@ -133,5 +136,64 @@ public class RoomController {
         }
 
         return "redirect:/rooms";
+    }
+
+    @GetMapping("/search")
+    public String searchRooms(
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false, defaultValue = "1") int guests,
+            Model model) {
+
+        model.addAttribute(
+                "rooms",
+                roomService.getAllRooms()
+        );
+
+        model.addAttribute(
+                "room",
+                new RoomDto()
+        );
+
+        model.addAttribute(
+                "roomTypes",
+                RoomType.values()
+        );
+
+        model.addAttribute(
+                "editMode",
+                false
+        );
+
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("guests", guests);
+
+        if (startDate == null || endDate == null) {
+            return "rooms/list";
+        }
+
+        if (!endDate.isAfter(startDate)) {
+
+            model.addAttribute(
+                    "searchError",
+                    "Utcheckningsdatum måste vara efter incheckningsdatum"
+            );
+
+            model.addAttribute("searchPerformed", true);
+
+            return "rooms/list";
+        }
+
+        model.addAttribute(
+                "availableRooms",
+                roomService.findAvailableRooms(startDate, endDate, guests)
+        );
+
+        model.addAttribute("searchPerformed", true);
+
+        return "rooms/list";
     }
 }
