@@ -8,8 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface RoomRepository
-        extends JpaRepository<Room, Long> {
+public interface RoomRepository extends JpaRepository<Room, Long> {
 
     boolean existsByRoomNumber(int roomNumber);
 
@@ -25,9 +24,7 @@ public interface RoomRepository
                 + r.extraBeds
             ) >= :guests
             """)
-    List<Room> findAvailableRooms(
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("guests") int guests
-    );
+    List<Room> findAvailableRooms(@Param("startDate") LocalDate startDate,
+                                  @Param("endDate") LocalDate endDate,
+                                  @Param("guests") int guests);
 }

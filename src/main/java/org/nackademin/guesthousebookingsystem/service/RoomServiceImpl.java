@@ -92,7 +92,7 @@ public class RoomServiceImpl implements RoomService {
 
         if (!bookingRepository.findByRoom(room).isEmpty()) {
             throw new IllegalStateException(
-                    "Kan inte ta bort rum — det finns bokningar kopplade till rummet");
+                    "Kan inte ta bort rum! Det finns aktiva bokningar kopplade till rummet");
         }
 
         roomRepository.deleteById(id);

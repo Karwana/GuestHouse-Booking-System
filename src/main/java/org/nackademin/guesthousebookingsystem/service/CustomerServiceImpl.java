@@ -69,7 +69,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         if (!bookingRepository.findByCustomer(customer).isEmpty()) {
             throw new IllegalStateException(
-                    "Kan inte ta bort kund — det finns aktiva bokningar kopplade till kunden");
+                    "Kan inte ta bort kund! Det finns aktiva bokningar kopplade till kunden");
         }
 
         customerRepository.deleteById(id);

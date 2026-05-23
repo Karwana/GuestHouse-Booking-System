@@ -22,138 +22,67 @@ public class BookingController {
     private final RoomService roomService;
 
     private void populateModel(Model model) {
-
-        model.addAttribute(
-                "bookings",
-                bookingService.getAllBookings()
-        );
-
-        model.addAttribute(
-                "customers",
-                customerService.getAllCustomers()
-        );
-
-        model.addAttribute(
-                "rooms",
-                roomService.getAllRooms()
-        );
+        model.addAttribute("bookings", bookingService.getAllBookings());
+        model.addAttribute("customers", customerService.getAllCustomers());
+        model.addAttribute("rooms", roomService.getAllRooms());
     }
 
     @GetMapping
     public String getBookings(Model model) {
-
         populateModel(model);
 
         BookingDto booking = new BookingDto();
-
         booking.setCustomer(new CustomerDto());
         booking.setRoom(new RoomDto());
 
-        model.addAttribute(
-                "booking",
-                booking
-        );
-
-        model.addAttribute(
-                "editMode",
-                false
-        );
-
+        model.addAttribute("booking", booking);
+        model.addAttribute("editMode", false);
         return "bookings/list";
     }
 
     @GetMapping("/edit/{id}")
-    public String editBooking(@PathVariable Long id,
-                              Model model) {
-
+    public String editBooking(@PathVariable Long id, Model model) {
         populateModel(model);
 
-        model.addAttribute(
-                "booking",
-                bookingService.getBookingById(id)
-        );
-
-        model.addAttribute(
-                "editMode",
-                true
-        );
-
+        model.addAttribute("booking", bookingService.getBookingById(id));
+        model.addAttribute("editMode", true);
         return "bookings/list";
     }
 
     @PostMapping("/save")
-    public String saveBooking(@ModelAttribute BookingDto bookingDto,
-                              RedirectAttributes ra) {
+    public String saveBooking(@ModelAttribute BookingDto bookingDto, RedirectAttributes ra) {
 
         try {
-
             bookingService.saveBooking(bookingDto);
-
-            ra.addFlashAttribute(
-                    "success",
-                    "Bokning sparad!"
-            );
-
+            ra.addFlashAttribute("success", "Bokning sparad!");
         } catch (Exception e) {
-
-            ra.addFlashAttribute(
-                    "error",
-                    e.getMessage()
-            );
+            ra.addFlashAttribute("error", e.getMessage());
         }
-
         return "redirect:/bookings";
     }
 
     @PostMapping("/update/{id}")
-    public String updateBooking(@PathVariable Long id,
-                                @ModelAttribute BookingDto bookingDto,
-                                RedirectAttributes ra) {
+    public String updateBooking(@PathVariable Long id, @ModelAttribute BookingDto bookingDto, RedirectAttributes ra) {
 
         try {
 
-            bookingService.updateBooking(
-                    id,
-                    bookingDto
-            );
-
-            ra.addFlashAttribute(
-                    "success",
-                    "Bokning uppdaterad!"
-            );
-
+            bookingService.updateBooking(id, bookingDto);
+            ra.addFlashAttribute("success", "Bokning uppdaterad!");
         } catch (Exception e) {
-
-            ra.addFlashAttribute(
-                    "error",
-                    e.getMessage()
-            );
+            ra.addFlashAttribute("error", e.getMessage());
         }
-
         return "redirect:/bookings";
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteBooking(@PathVariable Long id,
-                                RedirectAttributes ra) {
+    public String deleteBooking(@PathVariable Long id, RedirectAttributes ra) {
 
         try {
-
             bookingService.deleteBooking(id);
-
-            ra.addFlashAttribute(
-                    "success",
-                    "Bokning avbokad."
-            );
-
+            ra.addFlashAttribute("success", "Bokning avbokad.");
         } catch (Exception e) {
-
-            ra.addFlashAttribute(
-                    "error",
-                    "Bokningen kunde inte tas bort."
-            );
+            ra.addFlashAttribute("error", "Bokningen kunde inte tas bort.");
         }
-
         return "redirect:/bookings";
     }
 }
