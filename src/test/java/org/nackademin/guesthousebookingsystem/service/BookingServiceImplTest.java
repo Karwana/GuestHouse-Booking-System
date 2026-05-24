@@ -38,6 +38,9 @@ class BookingServiceImplTest {
     @Autowired
     private RoomRepository roomRepository;
 
+    @Autowired
+    private CustomerService customerService;
+
     private Customer savedCustomer;
     private Room savedRoom;
     private Booking savedBooking;
@@ -107,11 +110,25 @@ class BookingServiceImplTest {
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
         BookingDto updateInfo = new BookingDto(null, customerDto, roomDto,
-                LocalDate.of(2026, 6, 2),
-                LocalDate.of(2026, 6, 6));
+                LocalDate.of(2026, 7, 2),
+                LocalDate.of(2026, 7, 6));
 
         BookingDto result = bookingService.updateBooking(savedBooking.getId(), updateInfo);
-        assertEquals(LocalDate.of(2026, 6, 2), result.getStartDate());
+        assertEquals(LocalDate.of(2026, 7, 2), result.getStartDate());
+    }
+
+    @Test
+    void deleteCustomer_shouldFailIfCustomerHasActiveBookings() {
+        Room room = new Room(null, 101, RoomType.DOUBLE, 1);
+        Room savedRoom = roomRepository.save(room);
+
+        Booking booking = new Booking(null, savedCustomer, savedRoom,
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 6, 5));
+        bookingRepository.save(booking);
+
+        assertThrows(IllegalStateException.class, () ->
+                customerService.deleteCustomer(savedCustomer.getId()));
     }
 
     @Test
