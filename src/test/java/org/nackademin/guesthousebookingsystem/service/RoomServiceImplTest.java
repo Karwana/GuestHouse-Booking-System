@@ -1,6 +1,4 @@
 package org.nackademin.guesthousebookingsystem.service;
-
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
@@ -10,6 +8,7 @@ import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles({"test", "local"})
+@Transactional
 class RoomServiceImplTest {
 
     @Autowired
@@ -24,12 +24,11 @@ class RoomServiceImplTest {
 
     @Autowired
     private RoomRepository roomRepository;
+
     private Room savedRoom;
 
     @BeforeEach
     void setUp() {
-        roomRepository.deleteAll();
-
         Room room = new Room(null, 101, RoomType.DOUBLE, 1);
         savedRoom = roomRepository.save(room);
     }
@@ -74,10 +73,5 @@ class RoomServiceImplTest {
         roomService.deleteRoom(savedRoom.getId());
 
         assertEquals(0, roomRepository.findAll().size());
-    }
-
-    @AfterEach
-    void tearDown() {
-        roomRepository.deleteAll();
     }
 }

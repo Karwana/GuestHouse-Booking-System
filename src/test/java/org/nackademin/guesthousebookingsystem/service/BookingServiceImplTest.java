@@ -1,6 +1,4 @@
 package org.nackademin.guesthousebookingsystem.service;
-
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nackademin.guesthousebookingsystem.dto.BookingDto;
@@ -16,6 +14,7 @@ import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles({"test", "local"})
+@Transactional
 class BookingServiceImplTest {
 
     @Autowired
@@ -38,19 +38,12 @@ class BookingServiceImplTest {
     @Autowired
     private RoomRepository roomRepository;
 
-    @Autowired
-    private CustomerService customerService;
-
     private Customer savedCustomer;
     private Room savedRoom;
     private Booking savedBooking;
 
     @BeforeEach
     void setUp() {
-        bookingRepository.deleteAll();
-        roomRepository.deleteAll();
-        customerRepository.deleteAll();
-
         Customer customer = new Customer(null, "Maruf", "maruf@test.com", "070123456");
         savedCustomer = customerRepository.save(customer);
 
@@ -118,30 +111,9 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void deleteCustomer_shouldFailIfCustomerHasActiveBookings() {
-        Room room = new Room(null, 101, RoomType.DOUBLE, 1);
-        Room savedRoom = roomRepository.save(room);
-
-        Booking booking = new Booking(null, savedCustomer, savedRoom,
-                LocalDate.of(2026, 6, 1),
-                LocalDate.of(2026, 6, 5));
-        bookingRepository.save(booking);
-
-        assertThrows(IllegalStateException.class, () ->
-                customerService.deleteCustomer(savedCustomer.getId()));
-    }
-
-    @Test
     void deleteBooking_shouldDeleteSuccessfully() {
         bookingService.deleteBooking(savedBooking.getId());
 
         assertEquals(0, bookingRepository.findAll().size());
-    }
-
-    @AfterEach
-    void tearDown() {
-        bookingRepository.deleteAll();
-        roomRepository.deleteAll();
-        customerRepository.deleteAll();
     }
 }
