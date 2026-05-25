@@ -92,6 +92,18 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void saveBooking_shouldThrowWhenEndDateBeforeStartDate() {
+        CustomerDto customerDto = new CustomerDto(savedCustomer.getId(), "Maruf", "maruf@test.com", "070123456");
+        RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
+
+        BookingDto invalidBooking = new BookingDto(null, customerDto, roomDto,
+                LocalDate.of(2026, 6, 10),
+                LocalDate.of(2026, 6, 5));
+
+        assertThrows(IllegalArgumentException.class, () -> bookingService.saveBooking(invalidBooking));
+    }
+
+    @Test
     void getBookingById_shouldReturnBooking() {
         BookingDto result = bookingService.getBookingById(savedBooking.getId());
         assertEquals("Maruf", result.getCustomer().getName());

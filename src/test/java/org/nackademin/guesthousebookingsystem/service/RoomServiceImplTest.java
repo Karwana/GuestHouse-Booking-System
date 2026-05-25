@@ -2,14 +2,19 @@ package org.nackademin.guesthousebookingsystem.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
+import org.nackademin.guesthousebookingsystem.entity.Booking;
+import org.nackademin.guesthousebookingsystem.entity.Customer;
 import org.nackademin.guesthousebookingsystem.entity.Room;
 import org.nackademin.guesthousebookingsystem.entity.RoomType;
+import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
+import org.nackademin.guesthousebookingsystem.repository.CustomerRepository;
 import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +29,12 @@ class RoomServiceImplTest {
 
     @Autowired
     private RoomRepository roomRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     private Room savedRoom;
 
@@ -57,6 +68,38 @@ class RoomServiceImplTest {
 
         assertEquals(102, result.getRoomNumber());
         assertEquals(2, roomRepository.findAll().size());
+    }
+
+    @Test
+    void findAvailableRooms_shouldReturnAvailableRooms() {
+        List<RoomDto> result = roomService.findAvailableRooms(
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 5),
+                1);
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    void saveRoom_shouldThrowWhenRoomNumberBelowOne() {
+        RoomDto invalidRoom = new RoomDto(null, 0, RoomType.SINGLE, 0);
+        assertThrows(IllegalArgumentException.class, () -> roomService.saveRoom(invalidRoom));
+    }
+
+    @Test
+    void saveRoom_shouldThrowWhenRoomNumberAlreadyExists() {
+        RoomDto duplicate = new RoomDto(null, 101, RoomType.SINGLE, 0);
+        assertThrows(IllegalArgumentException.class, () -> roomService.saveRoom(duplicate));
+    }
+
+    @Test
+    void deleteRoom_shouldFailIfRoomHasActiveBookings() {
+        Customer customer = customerRepository.save(
+                new Customer(null, "Test", "test@test.com", "070000000"));
+        Booking booking = new Booking(null, customer, savedRoom,
+                LocalDate.of(2026, 6, 1),
+                LocalDate.of(2026, 6, 5));
+        bookingRepository.save(booking);
+        assertThrows(IllegalStateException.class, () -> roomService.deleteRoom(savedRoom.getId()));
     }
 
     @Test
