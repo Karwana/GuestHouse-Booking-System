@@ -92,7 +92,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void saveBooking_shouldThrowWhenEndDateBeforeStartDate() {
+    void saveBooking_shouldFailWhenCheckoutBeforeCheckin() {
         CustomerDto customerDto = new CustomerDto(savedCustomer.getId(), "Maruf", "maruf@test.com", "070123456");
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
