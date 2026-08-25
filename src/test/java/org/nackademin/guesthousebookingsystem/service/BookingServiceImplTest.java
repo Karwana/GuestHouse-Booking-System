@@ -2,7 +2,6 @@ package org.nackademin.guesthousebookingsystem.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nackademin.guesthousebookingsystem.dto.BookingDto;
-import org.nackademin.guesthousebookingsystem.dto.CustomerDto;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.entity.Booking;
 import org.nackademin.guesthousebookingsystem.entity.Customer;
@@ -50,7 +49,7 @@ class BookingServiceImplTest {
         Room room = new Room(null, 101, RoomType.DOUBLE, 1);
         savedRoom = roomRepository.save(room);
 
-        Booking booking = new Booking(null, savedCustomer, savedRoom,
+        Booking booking = new Booking(null, savedCustomer.getId(), savedRoom,
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 5));
         savedBooking = bookingRepository.save(booking);
@@ -61,15 +60,14 @@ class BookingServiceImplTest {
         List<BookingDto> result = bookingService.getAllBookings();
 
         assertEquals(1, result.size());
-        assertEquals("Maruf", result.get(0).getCustomer().getName());
+        assertEquals("Maruf", result.get(0).getCustomerName());
     }
 
     @Test
     void saveBooking_shouldSaveWhenDatesAreFree() {
-        CustomerDto customerDto = new CustomerDto(savedCustomer.getId(), "Maruf", "maruf@test.com", "070123456");
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto newBooking = new BookingDto(null, customerDto, roomDto,
+        BookingDto newBooking = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
                 LocalDate.of(2026, 6, 10),
                 LocalDate.of(2026, 6, 15));
 
@@ -81,10 +79,9 @@ class BookingServiceImplTest {
 
     @Test
     void saveBooking_shouldThrowExceptionWhenDatesOverlap() {
-        CustomerDto customerDto = new CustomerDto(savedCustomer.getId(), "Maruf", "maruf@test.com", "070123456");
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto overlappingBooking = new BookingDto(null, customerDto, roomDto,
+        BookingDto overlappingBooking = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
                 LocalDate.of(2026, 6, 3),
                 LocalDate.of(2026, 6, 8));
 
@@ -93,10 +90,9 @@ class BookingServiceImplTest {
 
     @Test
     void saveBooking_shouldFailWhenCheckoutBeforeCheckin() {
-        CustomerDto customerDto = new CustomerDto(savedCustomer.getId(), "Maruf", "maruf@test.com", "070123456");
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto invalidBooking = new BookingDto(null, customerDto, roomDto,
+        BookingDto invalidBooking = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
                 LocalDate.of(2026, 6, 10),
                 LocalDate.of(2026, 6, 5));
 
@@ -106,15 +102,14 @@ class BookingServiceImplTest {
     @Test
     void getBookingById_shouldReturnBooking() {
         BookingDto result = bookingService.getBookingById(savedBooking.getId());
-        assertEquals("Maruf", result.getCustomer().getName());
+        assertEquals("Maruf", result.getCustomerName());
     }
 
     @Test
     void updateBooking_shouldUpdateExistingBooking() {
-        CustomerDto customerDto = new CustomerDto(savedCustomer.getId(), "Maruf", "maruf@test.com", "070123456");
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto updateInfo = new BookingDto(null, customerDto, roomDto,
+        BookingDto updateInfo = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
                 LocalDate.of(2026, 7, 2),
                 LocalDate.of(2026, 7, 6));
 

@@ -95,7 +95,7 @@ class RoomServiceImplTest {
     void deleteRoom_shouldFailIfRoomHasActiveBookings() {
         Customer customer = customerRepository.save(
                 new Customer(null, "Test", "test@test.com", "070000000"));
-        Booking booking = new Booking(null, customer, savedRoom,
+        Booking booking = new Booking(null, customer.getId(), savedRoom,
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 5));
         bookingRepository.save(booking);
