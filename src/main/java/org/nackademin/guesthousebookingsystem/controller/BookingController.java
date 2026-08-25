@@ -1,12 +1,12 @@
 package org.nackademin.guesthousebookingsystem.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.nackademin.guesthousebookingsystem.client.CustomerClient;
 import org.nackademin.guesthousebookingsystem.dto.BookingDto;
-import org.nackademin.guesthousebookingsystem.dto.CustomerDto;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.service.BookingService;
-import org.nackademin.guesthousebookingsystem.service.CustomerService;
 import org.nackademin.guesthousebookingsystem.service.RoomService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +18,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final CustomerService customerService;
+    private final CustomerClient customerClient;
     private final RoomService roomService;
 
     private void populateModel(Model model) {
-        model.addAttribute("bookings", bookingService.getAllBookings());
-        model.addAttribute("customers", customerService.getAllCustomers());
-        model.addAttribute("rooms", roomService.getAllRooms());
+        model.addAttribute("bookings",
+                bookingService.getAllBookings());
+        model.addAttribute("rooms",
+                roomService.getAllRooms());
+        try {
+            model.addAttribute("customers",
+                    customerClient.getAllCustomers());
+        } catch (RuntimeException e) {
+            model.addAttribute("customers",
+                    java.util.Collections.emptyList());
+            model.addAttribute("customerServiceError",
+                    e.getMessage());
+        }
     }
 
     @GetMapping
@@ -32,7 +42,6 @@ public class BookingController {
         populateModel(model);
 
         BookingDto booking = new BookingDto();
-        booking.setCustomer(new CustomerDto());
         booking.setRoom(new RoomDto());
 
         model.addAttribute("booking", booking);
@@ -41,17 +50,20 @@ public class BookingController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editBooking(@PathVariable Long id, Model model) {
+    public String editBooking(
+            @PathVariable Long id,
+            Model model) {
         populateModel(model);
-
-        model.addAttribute("booking", bookingService.getBookingById(id));
+        model.addAttribute("booking",
+                bookingService.getBookingById(id));
         model.addAttribute("editMode", true);
         return "bookings/list";
     }
 
     @PostMapping("/save")
-    public String saveBooking(@ModelAttribute BookingDto bookingDto, RedirectAttributes ra) {
-
+    public String saveBooking(
+            @ModelAttribute BookingDto bookingDto,
+            RedirectAttributes ra) {
         try {
             bookingService.saveBooking(bookingDto);
             ra.addFlashAttribute("success", "Bokning sparad!");
@@ -62,10 +74,11 @@ public class BookingController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateBooking(@PathVariable Long id, @ModelAttribute BookingDto bookingDto, RedirectAttributes ra) {
-
+    public String updateBooking(
+            @PathVariable Long id,
+            @ModelAttribute BookingDto bookingDto,
+            RedirectAttributes ra) {
         try {
-
             bookingService.updateBooking(id, bookingDto);
             ra.addFlashAttribute("success", "Bokning uppdaterad!");
         } catch (Exception e) {
@@ -75,14 +88,24 @@ public class BookingController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteBooking(@PathVariable Long id, RedirectAttributes ra) {
-
+    public String deleteBooking(
+            @PathVariable Long id,
+            RedirectAttributes ra) {
         try {
             bookingService.deleteBooking(id);
             ra.addFlashAttribute("success", "Bokning avbokad.");
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Bokningen kunde inte tas bort.");
+            ra.addFlashAttribute("error",
+                    "Bokningen kunde inte tas bort.");
         }
         return "redirect:/bookings";
+    }
+
+    @GetMapping("/customer/{customerId}/exists")
+    @ResponseBody
+    public ResponseEntity<Boolean> customerHasBookings(
+            @PathVariable Long customerId) {
+        return ResponseEntity.ok(
+                bookingService.customerHasActiveBookings(customerId));
     }
 }

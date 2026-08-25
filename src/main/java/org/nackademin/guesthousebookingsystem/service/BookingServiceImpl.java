@@ -1,14 +1,13 @@
 package org.nackademin.guesthousebookingsystem.service;
 
 import lombok.RequiredArgsConstructor;
+import org.nackademin.guesthousebookingsystem.client.CustomerClient;
 import org.nackademin.guesthousebookingsystem.dto.BookingDto;
 import org.nackademin.guesthousebookingsystem.dto.CustomerDto;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.entity.Booking;
-import org.nackademin.guesthousebookingsystem.entity.Customer;
 import org.nackademin.guesthousebookingsystem.entity.Room;
 import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
-import org.nackademin.guesthousebookingsystem.repository.CustomerRepository;
 import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,24 +19,32 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
-    private final CustomerRepository customerRepository;
+    private final CustomerClient customerClient;
 
     private BookingDto toDto(Booking booking) {
-        CustomerDto customerDto = new CustomerDto(
-                booking.getCustomer().getId(),
-                booking.getCustomer().getName(),
-                booking.getCustomer().getEmail(),
-                booking.getCustomer().getPhoneNumber()
-        );
+
         RoomDto roomDto = new RoomDto(
                 booking.getRoom().getId(),
                 booking.getRoom().getRoomNumber(),
                 booking.getRoom().getRoomType(),
                 booking.getRoom().getExtraBeds()
         );
+
+        String customerName = "Kund-id: " + booking.getCustomerId();
+        try {
+            CustomerDto customer = customerClient
+                    .getCustomerById(booking.getCustomerId());
+            if (customer != null) {
+                customerName = customer.getName();
+            }
+        } catch (RuntimeException e) {
+            // Kundtjänsten är nere — visa id istället
+        }
+
         return new BookingDto(
                 booking.getId(),
-                customerDto,
+                booking.getCustomerId(),
+                customerName,
                 roomDto,
                 booking.getStartDate(),
                 booking.getEndDate()
@@ -45,13 +52,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Booking toEntity(BookingDto dto) {
-        Customer customer = customerRepository.findById(dto.getCustomer().getId())
-                .orElseThrow(() -> new RuntimeException("Kund hittades inte"));
         Room room = roomRepository.findById(dto.getRoom().getId())
-                .orElseThrow(() -> new RuntimeException("Rum hittades inte"));
+                .orElseThrow(() ->
+                        new RuntimeException("Rum hittades inte"));
         return new Booking(
                 dto.getId(),
-                customer,
+                dto.getCustomerId(),
                 room,
                 dto.getStartDate(),
                 dto.getEndDate()
@@ -90,11 +96,18 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(Long id) {
         return bookingRepository.findById(id)
                 .map(this::toDto)
-                .orElseThrow(() -> new RuntimeException("Bokning hittades inte"));
+                .orElseThrow(() ->
+                        new RuntimeException("Bokning hittades inte"));
     }
 
     @Override
     public BookingDto saveBooking(BookingDto bookingDto) {
+        if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+            throw new RuntimeException(
+                    "Kund med id "
+                            + bookingDto.getCustomerId()
+                            + " hittades inte");
+        }
         checkConflicts(bookingDto, -1L);
         Booking saved = bookingRepository.save(toEntity(bookingDto));
         return toDto(saved);
@@ -102,6 +115,12 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto updateBooking(Long id, BookingDto bookingDto) {
+        if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+            throw new RuntimeException(
+                    "Kund med id "
+                            + bookingDto.getCustomerId()
+                            + " hittades inte");
+        }
         bookingDto.setId(id);
         checkConflicts(bookingDto, id);
         Booking saved = bookingRepository.save(toEntity(bookingDto));
@@ -111,5 +130,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public void deleteBooking(Long id) {
         bookingRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean customerHasActiveBookings(Long customerId) {
+        return bookingRepository.existsByCustomerId(customerId);
     }
 }

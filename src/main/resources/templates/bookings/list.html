@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Bokningar</title>
-
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
@@ -12,75 +11,48 @@
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-
     <div class="container">
-
-        <a class="navbar-brand" th:href="@{/}">
-            GuestHouse
-        </a>
-
+        <a class="navbar-brand" th:href="@{/}">GuestHouse</a>
         <div class="navbar-nav">
-
-            <a class="nav-link" th:href="@{/}">
-                Startsida
-            </a>
-
-            <a class="nav-link" th:href="@{/customers}">
-                Kunder
-            </a>
-
-            <a class="nav-link" th:href="@{/rooms}">
-                Rum
-            </a>
-
-            <a class="nav-link active" th:href="@{/bookings}">
-                Bokningar
-            </a>
-
+            <a class="nav-link" th:href="@{/}">Startsida</a>
+            <a class="nav-link" th:href="@{/customers}">Kunder</a>
+            <a class="nav-link" th:href="@{/rooms}">Rum</a>
+            <a class="nav-link active" th:href="@{/bookings}">Bokningar</a>
         </div>
-
     </div>
-
 </nav>
 
 <div class="container mt-4">
 
-    <h1 class="mb-4">
-        Bokningar
-    </h1>
+    <h1 class="mb-4">Bokningar</h1>
 
     <div th:if="${success}"
          class="alert alert-success alert-dismissible fade show">
-
         <span th:text="${success}"></span>
-
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert">
-        </button>
-
+        <button type="button" class="btn-close"
+                data-bs-dismiss="alert"></button>
     </div>
 
     <div th:if="${error}"
          class="alert alert-danger alert-dismissible fade show">
-
         <span th:text="${error}"></span>
+        <button type="button" class="btn-close"
+                data-bs-dismiss="alert"></button>
+    </div>
 
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="alert">
-        </button>
-
+    <div th:if="${customerServiceError}"
+         class="alert alert-warning alert-dismissible fade show">
+        <span th:text="${customerServiceError}"></span>
+        <button type="button" class="btn-close"
+                data-bs-dismiss="alert"></button>
     </div>
 
     <div class="row">
 
         <div class="col-md-4">
-
             <div class="card p-4 shadow-sm">
 
-                <h3 th:text="${editMode} ? 'Redigera bokning' : 'Ny bokning'">
-                </h3>
+                <h3 th:text="${editMode} ? 'Redigera bokning' : 'Ny bokning'"></h3>
 
                 <form th:action="${editMode} ?
                       @{/bookings/update/{id}(id=${booking.id})} :
@@ -89,160 +61,108 @@
                       method="post">
 
                     <div class="mb-3">
-
                         <label>Kund</label>
-
                         <select class="form-control"
-                                th:field="*{customer.id}"
+                                th:field="*{customerId}"
                                 required>
-
-                            <option value="">
-                                Välj kund
-                            </option>
-
+                            <option value="">Välj kund</option>
                             <option th:each="c : ${customers}"
                                     th:value="${c.id}"
                                     th:text="${c.name}">
                             </option>
-
                         </select>
-
                     </div>
 
                     <div class="mb-3">
-
                         <label>Rum</label>
-
                         <select class="form-control"
                                 th:field="*{room.id}"
                                 required>
-
-                            <option value="">
-                                Välj rum
-                            </option>
-
+                            <option value="">Välj rum</option>
                             <option th:each="r : ${rooms}"
                                     th:value="${r.id}"
                                     th:text="'Rum ' + ${r.roomNumber}">
                             </option>
-
                         </select>
-
                     </div>
 
                     <div class="mb-3">
-
                         <label>Startdatum</label>
-
                         <input type="date"
                                class="form-control"
                                th:field="*{startDate}"
                                required>
-
                     </div>
 
                     <div class="mb-3">
-
                         <label>Slutdatum</label>
-
                         <input type="date"
                                class="form-control"
                                th:field="*{endDate}"
                                required>
-
                     </div>
 
                     <button type="submit"
                             th:class="${editMode} ?
                             'btn btn-warning w-100' :
                             'btn btn-primary w-100'">
-
-                        <span th:text="${editMode} ? 'Uppdatera bokning' : 'Spara bokning'">
-                        </span>
-
+                        <span th:text="${editMode} ?
+                              'Uppdatera bokning' :
+                              'Spara bokning'"></span>
                     </button>
 
                     <a th:if="${editMode}"
                        th:href="@{/bookings}"
                        class="btn btn-secondary w-100 mt-2">
-
                         Avbryt
                     </a>
 
                 </form>
-
             </div>
-
         </div>
 
         <div class="col-md-8">
-
             <div class="card p-4 shadow-sm">
 
-                <h3 class="mb-3">
-                    Alla bokningar
-                </h3>
+                <h3 class="mb-3">Alla bokningar</h3>
 
                 <table class="table table-bordered table-hover">
-
                     <thead class="table-dark">
-
                     <tr>
-
                         <th>Kund</th>
                         <th>Rum</th>
                         <th>Start</th>
                         <th>Slut</th>
                         <th>Åtgärder</th>
-
                     </tr>
-
                     </thead>
-
                     <tbody>
-
                     <tr th:each="b : ${bookings}">
-
-                        <td th:text="${b.customer.name}"></td>
-
+                        <td th:text="${b.customerName}"></td>
                         <td th:text="${b.room.roomNumber}"></td>
-
                         <td th:text="${b.startDate}"></td>
-
                         <td th:text="${b.endDate}"></td>
-
                         <td>
-
                             <a th:href="@{/bookings/edit/{id}(id=${b.id})}"
                                class="btn btn-sm btn-primary">
-
                                 Edit
                             </a>
-
                             <a th:href="@{/bookings/delete/{id}(id=${b.id})}"
                                class="btn btn-sm btn-danger"
-                               onclick="return confirm('Är du säker på att du vill ta bort bokningen?')">
-
+                               onclick="return confirm('Är du säker?')">
                                 Delete
                             </a>
-
                         </td>
-
                     </tr>
-
                     </tbody>
-
                 </table>
 
             </div>
-
         </div>
 
     </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

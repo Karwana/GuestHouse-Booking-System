@@ -17,8 +17,7 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Customer customer;
+    private Long customerId;
 
     @ManyToOne
     private Room room;

@@ -10,8 +10,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingDto {
+
     private Long id;
-    private CustomerDto customer;
+    private Long customerId;
+    private String customerName;
     private RoomDto room;
     private LocalDate startDate;
     private LocalDate endDate;
