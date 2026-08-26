@@ -103,9 +103,8 @@ public class BookingController {
 
     @GetMapping("/customer/{customerId}/exists")
     @ResponseBody
-    public ResponseEntity<Boolean> customerHasBookings(
-            @PathVariable Long customerId) {
-        return ResponseEntity.ok(
-                bookingService.customerHasActiveBookings(customerId));
+    public ResponseEntity<Boolean> checkActiveBookings(@PathVariable Long customerId) {
+        boolean exists = bookingService.customerHasActiveBookings(customerId);
+        return ResponseEntity.ok(exists);
     }
 }
