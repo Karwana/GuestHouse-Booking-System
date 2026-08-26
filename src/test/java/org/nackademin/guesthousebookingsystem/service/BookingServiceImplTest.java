@@ -4,11 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.nackademin.guesthousebookingsystem.dto.BookingDto;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.entity.Booking;
-import org.nackademin.guesthousebookingsystem.entity.Customer;
 import org.nackademin.guesthousebookingsystem.entity.Room;
 import org.nackademin.guesthousebookingsystem.entity.RoomType;
 import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
-import org.nackademin.guesthousebookingsystem.repository.CustomerRepository;
 import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,24 +30,18 @@ class BookingServiceImplTest {
     private BookingRepository bookingRepository;
 
     @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
     private RoomRepository roomRepository;
 
-    private Customer savedCustomer;
+    private final Long customerId = 1L;
     private Room savedRoom;
     private Booking savedBooking;
 
     @BeforeEach
     void setUp() {
-        Customer customer = new Customer(null, "Maruf", "maruf@test.com", "070123456");
-        savedCustomer = customerRepository.save(customer);
-
         Room room = new Room(null, 101, RoomType.DOUBLE, 1);
         savedRoom = roomRepository.save(room);
 
-        Booking booking = new Booking(null, savedCustomer.getId(), savedRoom,
+        Booking booking = new Booking(null, customerId, savedRoom,
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 5));
         savedBooking = bookingRepository.save(booking);
@@ -60,14 +52,14 @@ class BookingServiceImplTest {
         List<BookingDto> result = bookingService.getAllBookings();
 
         assertEquals(1, result.size());
-        assertEquals("Maruf", result.get(0).getCustomerName());
+        assertEquals(customerId, result.get(0).getCustomerId());
     }
 
     @Test
     void saveBooking_shouldSaveWhenDatesAreFree() {
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto newBooking = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
+        BookingDto newBooking = new BookingDto(null, customerId, null, roomDto,
                 LocalDate.of(2026, 6, 10),
                 LocalDate.of(2026, 6, 15));
 
@@ -81,7 +73,7 @@ class BookingServiceImplTest {
     void saveBooking_shouldThrowExceptionWhenDatesOverlap() {
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto overlappingBooking = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
+        BookingDto overlappingBooking = new BookingDto(null, customerId, null, roomDto,
                 LocalDate.of(2026, 6, 3),
                 LocalDate.of(2026, 6, 8));
 
@@ -92,7 +84,7 @@ class BookingServiceImplTest {
     void saveBooking_shouldFailWhenCheckoutBeforeCheckin() {
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto invalidBooking = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
+        BookingDto invalidBooking = new BookingDto(null, customerId, null, roomDto,
                 LocalDate.of(2026, 6, 10),
                 LocalDate.of(2026, 6, 5));
 
@@ -102,14 +94,14 @@ class BookingServiceImplTest {
     @Test
     void getBookingById_shouldReturnBooking() {
         BookingDto result = bookingService.getBookingById(savedBooking.getId());
-        assertEquals("Maruf", result.getCustomerName());
+        assertEquals(customerId, result.getCustomerId());
     }
 
     @Test
     void updateBooking_shouldUpdateExistingBooking() {
         RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
 
-        BookingDto updateInfo = new BookingDto(null, savedCustomer.getId(), savedCustomer.getName(), roomDto,
+        BookingDto updateInfo = new BookingDto(null, customerId, null, roomDto,
                 LocalDate.of(2026, 7, 2),
                 LocalDate.of(2026, 7, 6));
 

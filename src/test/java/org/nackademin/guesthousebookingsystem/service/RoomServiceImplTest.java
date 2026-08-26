@@ -3,11 +3,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.entity.Booking;
-import org.nackademin.guesthousebookingsystem.entity.Customer;
 import org.nackademin.guesthousebookingsystem.entity.Room;
 import org.nackademin.guesthousebookingsystem.entity.RoomType;
 import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
-import org.nackademin.guesthousebookingsystem.repository.CustomerRepository;
 import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,9 +30,6 @@ class RoomServiceImplTest {
 
     @Autowired
     private BookingRepository bookingRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     private Room savedRoom;
 
@@ -93,9 +88,8 @@ class RoomServiceImplTest {
 
     @Test
     void deleteRoom_shouldFailIfRoomHasActiveBookings() {
-        Customer customer = customerRepository.save(
-                new Customer(null, "Test", "test@test.com", "070000000"));
-        Booking booking = new Booking(null, customer.getId(), savedRoom,
+        Long customerId = 1L;
+        Booking booking = new Booking(null, customerId, savedRoom,
                 LocalDate.of(2026, 6, 1),
                 LocalDate.of(2026, 6, 5));
         bookingRepository.save(booking);
