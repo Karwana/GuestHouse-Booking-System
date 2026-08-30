@@ -22,7 +22,10 @@ public class BookingServiceImpl implements BookingService {
     private final CustomerClient customerClient;
 
     private BookingDto toDto(Booking booking) {
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
         RoomDto roomDto = new RoomDto(
                 booking.getRoom().getId(),
                 booking.getRoom().getRoomNumber(),
@@ -30,7 +33,12 @@ public class BookingServiceImpl implements BookingService {
                 booking.getRoom().getExtraBeds()
         );
 
+<<<<<<< Updated upstream
         String customerName = "Kund-id: " + booking.getCustomerId();
+=======
+        String customerName = "Kund-id: "
+                + booking.getCustomerId();
+>>>>>>> Stashed changes
         try {
             CustomerDto customer = customerClient
                     .getCustomerById(booking.getCustomerId());
@@ -38,7 +46,11 @@ public class BookingServiceImpl implements BookingService {
                 customerName = customer.getName();
             }
         } catch (RuntimeException e) {
+<<<<<<< Updated upstream
             // Kundtjänsten är nere — visa id istället
+=======
+
+>>>>>>> Stashed changes
         }
 
         return new BookingDto(
@@ -52,7 +64,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Booking toEntity(BookingDto dto) {
+<<<<<<< Updated upstream
         Room room = roomRepository.findById(dto.getRoom().getId())
+=======
+        Room room = roomRepository
+                .findById(dto.getRoom().getId())
+>>>>>>> Stashed changes
                 .orElseThrow(() ->
                         new RuntimeException("Rum hittades inte"));
         return new Booking(
@@ -65,12 +82,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void checkConflicts(BookingDto dto, Long excludeId) {
-        if (dto.getStartDate() == null || dto.getEndDate() == null) {
+        if (dto.getStartDate() == null
+                || dto.getEndDate() == null) {
             throw new IllegalArgumentException("Datum saknas");
         }
         if (!dto.getEndDate().isAfter(dto.getStartDate())) {
             throw new IllegalArgumentException(
-                    "Utcheckningsdatum måste vara efter incheckningsdatum");
+                    "Utcheckningsdatum måste vara "
+                            + "efter incheckningsdatum");
         }
         List<Booking> conflicts = bookingRepository.findOverlapping(
                 dto.getRoom().getId(),
@@ -97,25 +116,41 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.findById(id)
                 .map(this::toDto)
                 .orElseThrow(() ->
+<<<<<<< Updated upstream
                         new RuntimeException("Bokning hittades inte"));
+=======
+                        new RuntimeException(
+                                "Bokning hittades inte"));
+>>>>>>> Stashed changes
     }
 
     @Override
     public BookingDto saveBooking(BookingDto bookingDto) {
+<<<<<<< Updated upstream
         if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+=======
+        if (!customerClient.customerExists(
+                bookingDto.getCustomerId())) {
+>>>>>>> Stashed changes
             throw new RuntimeException(
                     "Kund med id "
                             + bookingDto.getCustomerId()
                             + " hittades inte");
         }
         checkConflicts(bookingDto, -1L);
-        Booking saved = bookingRepository.save(toEntity(bookingDto));
+        Booking saved = bookingRepository.save(
+                toEntity(bookingDto));
         return toDto(saved);
     }
 
     @Override
     public BookingDto updateBooking(Long id, BookingDto bookingDto) {
+<<<<<<< Updated upstream
         if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+=======
+        if (!customerClient.customerExists(
+                bookingDto.getCustomerId())) {
+>>>>>>> Stashed changes
             throw new RuntimeException(
                     "Kund med id "
                             + bookingDto.getCustomerId()
@@ -123,7 +158,8 @@ public class BookingServiceImpl implements BookingService {
         }
         bookingDto.setId(id);
         checkConflicts(bookingDto, id);
-        Booking saved = bookingRepository.save(toEntity(bookingDto));
+        Booking saved = bookingRepository.save(
+                toEntity(bookingDto));
         return toDto(saved);
     }
 
@@ -136,4 +172,15 @@ public class BookingServiceImpl implements BookingService {
     public boolean customerHasActiveBookings(Long customerId) {
         return bookingRepository.existsByCustomerId(customerId);
     }
+<<<<<<< Updated upstream
+=======
+
+    @Override
+    public boolean customerHasBookedRoom(
+            Long customerId,
+            Long roomId) {
+        return bookingRepository
+                .existsByCustomerIdAndRoomId(customerId, roomId);
+    }
+>>>>>>> Stashed changes
 }

@@ -17,6 +17,13 @@ public interface BookingRepository
     List<Booking> findByCustomerId(Long customerId);
 
     boolean existsByCustomerId(Long customerId);
+<<<<<<< Updated upstream
+=======
+
+    boolean existsByCustomerIdAndRoomId(
+            Long customerId,
+            Long roomId);
+>>>>>>> Stashed changes
 
     @Query("""
             SELECT b FROM Booking b

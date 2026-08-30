@@ -17,4 +17,9 @@ public interface BookingService {
     void deleteBooking(Long id);
 
     boolean customerHasActiveBookings(Long customerId);
+<<<<<<< Updated upstream
+=======
+
+    boolean customerHasBookedRoom(Long customerId, Long roomId);
+>>>>>>> Stashed changes
 }
