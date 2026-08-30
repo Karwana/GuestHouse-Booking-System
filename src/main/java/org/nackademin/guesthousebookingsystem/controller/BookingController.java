@@ -102,11 +102,6 @@ public class BookingController {
 
     @GetMapping("/customer/{customerId}/exists")
     @ResponseBody
-<<<<<<< Updated upstream
-    public ResponseEntity<Boolean> checkActiveBookings(@PathVariable Long customerId) {
-        boolean exists = bookingService.customerHasActiveBookings(customerId);
-        return ResponseEntity.ok(exists);
-=======
     public ResponseEntity<Boolean> customerHasBookings(
             @PathVariable Long customerId) {
         return ResponseEntity.ok(
@@ -122,6 +117,5 @@ public class BookingController {
         return ResponseEntity.ok(
                 bookingService.customerHasBookedRoom(
                         customerId, roomId));
->>>>>>> Stashed changes
     }
 }
