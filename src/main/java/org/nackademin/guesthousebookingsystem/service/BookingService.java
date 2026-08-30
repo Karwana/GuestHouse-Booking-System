@@ -17,4 +17,6 @@ public interface BookingService {
     void deleteBooking(Long id);
 
     boolean customerHasActiveBookings(Long customerId);
+
+    boolean customerHasBookedRoom(Long customerId, Long roomId);
 }

@@ -40,10 +40,8 @@ public class BookingController {
     @GetMapping
     public String getBookings(Model model) {
         populateModel(model);
-
         BookingDto booking = new BookingDto();
         booking.setRoom(new RoomDto());
-
         model.addAttribute("booking", booking);
         model.addAttribute("editMode", false);
         return "bookings/list";
@@ -80,7 +78,8 @@ public class BookingController {
             RedirectAttributes ra) {
         try {
             bookingService.updateBooking(id, bookingDto);
-            ra.addFlashAttribute("success", "Bokning uppdaterad!");
+            ra.addFlashAttribute("success",
+                    "Bokning uppdaterad!");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -103,8 +102,20 @@ public class BookingController {
 
     @GetMapping("/customer/{customerId}/exists")
     @ResponseBody
-    public ResponseEntity<Boolean> checkActiveBookings(@PathVariable Long customerId) {
-        boolean exists = bookingService.customerHasActiveBookings(customerId);
-        return ResponseEntity.ok(exists);
+    public ResponseEntity<Boolean> customerHasBookings(
+            @PathVariable Long customerId) {
+        return ResponseEntity.ok(
+                bookingService.customerHasActiveBookings(
+                        customerId));
+    }
+
+    @GetMapping("/customer/{customerId}/room/{roomId}/exists")
+    @ResponseBody
+    public ResponseEntity<Boolean> customerHasBookedRoom(
+            @PathVariable Long customerId,
+            @PathVariable Long roomId) {
+        return ResponseEntity.ok(
+                bookingService.customerHasBookedRoom(
+                        customerId, roomId));
     }
 }

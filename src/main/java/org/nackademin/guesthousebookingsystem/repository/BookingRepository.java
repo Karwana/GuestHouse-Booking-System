@@ -18,6 +18,10 @@ public interface BookingRepository
 
     boolean existsByCustomerId(Long customerId);
 
+    boolean existsByCustomerIdAndRoomId(
+            Long customerId,
+            Long roomId);
+
     @Query("""
             SELECT b FROM Booking b
             WHERE b.room.id   = :roomId

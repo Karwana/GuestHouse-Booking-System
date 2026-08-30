@@ -22,7 +22,6 @@ public class BookingServiceImpl implements BookingService {
     private final CustomerClient customerClient;
 
     private BookingDto toDto(Booking booking) {
-
         RoomDto roomDto = new RoomDto(
                 booking.getRoom().getId(),
                 booking.getRoom().getRoomNumber(),
@@ -30,7 +29,8 @@ public class BookingServiceImpl implements BookingService {
                 booking.getRoom().getExtraBeds()
         );
 
-        String customerName = "Kund-id: " + booking.getCustomerId();
+        String customerName = "Kund-id: "
+                + booking.getCustomerId();
         try {
             CustomerDto customer = customerClient
                     .getCustomerById(booking.getCustomerId());
@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
                 customerName = customer.getName();
             }
         } catch (RuntimeException e) {
-            // Kundtjänsten är nere — visa id istället
+
         }
 
         return new BookingDto(
@@ -52,7 +52,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private Booking toEntity(BookingDto dto) {
-        Room room = roomRepository.findById(dto.getRoom().getId())
+        Room room = roomRepository
+                .findById(dto.getRoom().getId())
                 .orElseThrow(() ->
                         new RuntimeException("Rum hittades inte"));
         return new Booking(
@@ -65,12 +66,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void checkConflicts(BookingDto dto, Long excludeId) {
-        if (dto.getStartDate() == null || dto.getEndDate() == null) {
+        if (dto.getStartDate() == null
+                || dto.getEndDate() == null) {
             throw new IllegalArgumentException("Datum saknas");
         }
         if (!dto.getEndDate().isAfter(dto.getStartDate())) {
             throw new IllegalArgumentException(
-                    "Utcheckningsdatum måste vara efter incheckningsdatum");
+                    "Utcheckningsdatum måste vara "
+                            + "efter incheckningsdatum");
         }
         List<Booking> conflicts = bookingRepository.findOverlapping(
                 dto.getRoom().getId(),
@@ -97,25 +100,29 @@ public class BookingServiceImpl implements BookingService {
         return bookingRepository.findById(id)
                 .map(this::toDto)
                 .orElseThrow(() ->
-                        new RuntimeException("Bokning hittades inte"));
+                        new RuntimeException(
+                                "Bokning hittades inte"));
     }
 
     @Override
     public BookingDto saveBooking(BookingDto bookingDto) {
-        if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+        if (!customerClient.customerExists(
+                bookingDto.getCustomerId())) {
             throw new RuntimeException(
                     "Kund med id "
                             + bookingDto.getCustomerId()
                             + " hittades inte");
         }
         checkConflicts(bookingDto, -1L);
-        Booking saved = bookingRepository.save(toEntity(bookingDto));
+        Booking saved = bookingRepository.save(
+                toEntity(bookingDto));
         return toDto(saved);
     }
 
     @Override
     public BookingDto updateBooking(Long id, BookingDto bookingDto) {
-        if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+        if (!customerClient.customerExists(
+                bookingDto.getCustomerId())) {
             throw new RuntimeException(
                     "Kund med id "
                             + bookingDto.getCustomerId()
@@ -123,7 +130,8 @@ public class BookingServiceImpl implements BookingService {
         }
         bookingDto.setId(id);
         checkConflicts(bookingDto, id);
-        Booking saved = bookingRepository.save(toEntity(bookingDto));
+        Booking saved = bookingRepository.save(
+                toEntity(bookingDto));
         return toDto(saved);
     }
 
@@ -135,5 +143,13 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public boolean customerHasActiveBookings(Long customerId) {
         return bookingRepository.existsByCustomerId(customerId);
+    }
+
+    @Override
+    public boolean customerHasBookedRoom(
+            Long customerId,
+            Long roomId) {
+        return bookingRepository
+                .existsByCustomerIdAndRoomId(customerId, roomId);
     }
 }
