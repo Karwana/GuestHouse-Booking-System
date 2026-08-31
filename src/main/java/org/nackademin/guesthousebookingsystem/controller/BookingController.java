@@ -22,18 +22,13 @@ public class BookingController {
     private final RoomService roomService;
 
     private void populateModel(Model model) {
-        model.addAttribute("bookings",
-                bookingService.getAllBookings());
-        model.addAttribute("rooms",
-                roomService.getAllRooms());
+        model.addAttribute("bookings", bookingService.getAllBookings());
+        model.addAttribute("rooms", roomService.getAllRooms());
         try {
-            model.addAttribute("customers",
-                    customerClient.getAllCustomers());
+            model.addAttribute("customers", customerClient.getAllCustomers());
         } catch (RuntimeException e) {
-            model.addAttribute("customers",
-                    java.util.Collections.emptyList());
-            model.addAttribute("customerServiceError",
-                    e.getMessage());
+            model.addAttribute("customers", java.util.Collections.emptyList());
+            model.addAttribute("customerServiceError", e.getMessage());
         }
     }
 
@@ -48,20 +43,15 @@ public class BookingController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editBooking(
-            @PathVariable Long id,
-            Model model) {
+    public String editBooking(@PathVariable Long id, Model model) {
         populateModel(model);
-        model.addAttribute("booking",
-                bookingService.getBookingById(id));
+        model.addAttribute("booking", bookingService.getBookingById(id));
         model.addAttribute("editMode", true);
         return "bookings/list";
     }
 
     @PostMapping("/save")
-    public String saveBooking(
-            @ModelAttribute BookingDto bookingDto,
-            RedirectAttributes ra) {
+    public String saveBooking(@ModelAttribute BookingDto bookingDto, RedirectAttributes ra) {
         try {
             bookingService.saveBooking(bookingDto);
             ra.addFlashAttribute("success", "Bokning sparad!");
@@ -72,14 +62,10 @@ public class BookingController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateBooking(
-            @PathVariable Long id,
-            @ModelAttribute BookingDto bookingDto,
-            RedirectAttributes ra) {
+    public String updateBooking(@PathVariable Long id, @ModelAttribute BookingDto bookingDto, RedirectAttributes ra) {
         try {
             bookingService.updateBooking(id, bookingDto);
-            ra.addFlashAttribute("success",
-                    "Bokning uppdaterad!");
+            ra.addFlashAttribute("success", "Bokning uppdaterad!");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -87,35 +73,25 @@ public class BookingController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteBooking(
-            @PathVariable Long id,
-            RedirectAttributes ra) {
+    public String deleteBooking(@PathVariable Long id, RedirectAttributes ra) {
         try {
             bookingService.deleteBooking(id);
             ra.addFlashAttribute("success", "Bokning avbokad.");
         } catch (Exception e) {
-            ra.addFlashAttribute("error",
-                    "Bokningen kunde inte tas bort.");
+            ra.addFlashAttribute("error", "Bokningen kunde inte tas bort.");
         }
         return "redirect:/bookings";
     }
 
     @GetMapping("/customer/{customerId}/exists")
     @ResponseBody
-    public ResponseEntity<Boolean> customerHasBookings(
-            @PathVariable Long customerId) {
-        return ResponseEntity.ok(
-                bookingService.customerHasActiveBookings(
-                        customerId));
+    public ResponseEntity<Boolean> customerHasBookings(@PathVariable Long customerId) {
+        return ResponseEntity.ok(bookingService.customerHasActiveBookings(customerId));
     }
 
     @GetMapping("/customer/{customerId}/room/{roomId}/exists")
     @ResponseBody
-    public ResponseEntity<Boolean> customerHasBookedRoom(
-            @PathVariable Long customerId,
-            @PathVariable Long roomId) {
-        return ResponseEntity.ok(
-                bookingService.customerHasBookedRoom(
-                        customerId, roomId));
+    public ResponseEntity<Boolean> customerHasBookedRoom(@PathVariable Long customerId, @PathVariable Long roomId) {
+        return ResponseEntity.ok(bookingService.customerHasBookedRoom(customerId, roomId));
     }
 }

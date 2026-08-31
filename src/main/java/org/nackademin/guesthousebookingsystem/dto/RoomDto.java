@@ -9,6 +9,7 @@ import org.nackademin.guesthousebookingsystem.entity.RoomType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomDto {
+
     private Long id;
     private int roomNumber;
     private RoomType roomType;

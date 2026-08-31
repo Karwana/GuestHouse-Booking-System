@@ -20,11 +20,9 @@ public class CustomerController {
     @GetMapping
     public String getCustomers(Model model) {
         try {
-            model.addAttribute("customers",
-                    customerClient.getAllCustomers());
+            model.addAttribute("customers", customerClient.getAllCustomers());
         } catch (RuntimeException e) {
-            model.addAttribute("customers",
-                    Collections.emptyList());
+            model.addAttribute("customers", Collections.emptyList());
             model.addAttribute("error", e.getMessage());
         }
         model.addAttribute("customer", new CustomerDto());
@@ -33,19 +31,14 @@ public class CustomerController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editCustomer(
-            @PathVariable Long id,
-            Model model) {
+    public String editCustomer(@PathVariable Long id, Model model) {
         try {
-            model.addAttribute("customers",
-                    customerClient.getAllCustomers());
-            model.addAttribute("customer",
-                    customerClient.getCustomerById(id));
+            model.addAttribute("customers", customerClient.getAllCustomers());
+            model.addAttribute("customer", customerClient.getCustomerById(id));
             model.addAttribute("editMode", true);
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("customers",
-                    Collections.emptyList());
+            model.addAttribute("customers", Collections.emptyList());
             model.addAttribute("customer", new CustomerDto());
             model.addAttribute("editMode", false);
         }
@@ -53,9 +46,7 @@ public class CustomerController {
     }
 
     @PostMapping("/save")
-    public String saveCustomer(
-            @ModelAttribute CustomerDto customerDto,
-            RedirectAttributes ra) {
+    public String saveCustomer(@ModelAttribute CustomerDto customerDto, RedirectAttributes ra) {
         try {
             customerClient.saveCustomer(customerDto);
             ra.addFlashAttribute("success", "Kunden sparades!");
@@ -66,10 +57,7 @@ public class CustomerController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateCustomer(
-            @PathVariable Long id,
-            @ModelAttribute CustomerDto customerDto,
-            RedirectAttributes ra) {
+    public String updateCustomer(@PathVariable Long id, @ModelAttribute CustomerDto customerDto, RedirectAttributes ra) {
         try {
             customerClient.updateCustomer(id, customerDto);
             ra.addFlashAttribute("success", "Kunden uppdaterades!");
@@ -80,9 +68,7 @@ public class CustomerController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteCustomer(
-            @PathVariable Long id,
-            RedirectAttributes ra) {
+    public String deleteCustomer(@PathVariable Long id, RedirectAttributes ra) {
         try {
             customerClient.deleteCustomer(id);
             ra.addFlashAttribute("success", "Kunden togs bort.");

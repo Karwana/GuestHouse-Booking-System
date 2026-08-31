@@ -8,9 +8,6 @@ public class GuestHouseBookingSystemApplication {
 
     public static void main(String[] args) {
 
-        SpringApplication.run(
-                GuestHouseBookingSystemApplication.class,
-                args
-        );
+        SpringApplication.run(GuestHouseBookingSystemApplication.class, args);
     }
 }

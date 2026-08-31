@@ -18,92 +18,53 @@ public class RoomServiceImpl implements RoomService {
     private final BookingRepository bookingRepository;
 
     private RoomDto toDto(Room room) {
-
-        return new RoomDto(
-                room.getId(),
-                room.getRoomNumber(),
-                room.getRoomType(),
-                room.getExtraBeds()
-        );
+        return new RoomDto(room.getId(), room.getRoomNumber(), room.getRoomType(), room.getExtraBeds());
     }
 
     private Room toEntity(RoomDto dto) {
-
-        return new Room(
-                dto.getId(),
-                dto.getRoomNumber(),
-                dto.getRoomType(),
-                dto.getExtraBeds()
-        );
+        return new Room(dto.getId(), dto.getRoomNumber(), dto.getRoomType(), dto.getExtraBeds());
     }
 
     @Override
     public List<RoomDto> getAllRooms() {
-
-        return roomRepository.findAll()
-                .stream()
-                .map(this::toDto)
-                .toList();
+        return roomRepository.findAll().stream().map(this::toDto).toList();
     }
 
     @Override
     public RoomDto getRoomById(Long id) {
-
-        return roomRepository.findById(id)
-                .map(this::toDto)
-                .orElseThrow(() ->
-                        new RuntimeException("Rum hittades inte"));
+        return roomRepository.findById(id).map(this::toDto).orElseThrow(() -> new RuntimeException("Rum hittades inte"));
     }
 
     @Override
     public RoomDto saveRoom(RoomDto roomDto) {
-
         if (roomDto.getRoomNumber() < 1) {
-            throw new IllegalArgumentException(
-                    "Rumsnummer måste vara större än 0.");
+            throw new IllegalArgumentException("Rumsnummer måste vara större än 0.");
         }
-
         if (roomRepository.existsByRoomNumber(roomDto.getRoomNumber())) {
-            throw new IllegalArgumentException(
-                    "Rumsnummer finns redan.");
+            throw new IllegalArgumentException("Rumsnummer finns redan.");
         }
-
         Room saved = roomRepository.save(toEntity(roomDto));
-
         return toDto(saved);
     }
 
     @Override
     public RoomDto updateRoom(Long id, RoomDto roomDto) {
-
         roomDto.setId(id);
-
         Room saved = roomRepository.save(toEntity(roomDto));
-
         return toDto(saved);
     }
 
     @Override
     public void deleteRoom(Long id) {
-
-        Room room = roomRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Rum hittades inte"));
-
+        Room room = roomRepository.findById(id).orElseThrow(() -> new RuntimeException("Rum hittades inte"));
         if (!bookingRepository.findByRoom(room).isEmpty()) {
-            throw new IllegalStateException(
-                    "Kan inte ta bort rum! Det finns aktiva bokningar kopplade till rummet");
+            throw new IllegalStateException("Kan inte ta bort rum! Det finns aktiva bokningar kopplade till rummet");
         }
-
         roomRepository.deleteById(id);
     }
 
     @Override
     public List<RoomDto> findAvailableRooms(LocalDate startDate, LocalDate endDate, int guests) {
-
-        return roomRepository.findAvailableRooms(startDate, endDate, guests)
-                .stream()
-                .map(this::toDto)
-                .toList();
+        return roomRepository.findAvailableRooms(startDate, endDate, guests).stream().map(this::toDto).toList();
     }
 }
