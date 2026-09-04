@@ -1,6 +1,9 @@
 # GuestHouse Booking System
 
-A web application for managing guest house reservations, built with Spring Boot and Thymeleaf.
+A web application for managing guest house reservations, built with Spring Boot, Thymeleaf, and Docker.
+
+## Microservices
+This application is part of an interconnected microservices architecture and works together with the **Customer Service** and **Review Service**. It communicates with the Customer Service via REST to fetch customer details and validate bookings.
 
 ## Features
 * **Customers:** Register, update, and delete customers.
@@ -14,41 +17,14 @@ A web application for managing guest house reservations, built with Spring Boot 
 * Spring Data JPA & Hibernate
 * MySQL
 * Thymeleaf & Bootstrap 5
+* Docker
 
-## Architecture
-* **Controllers:** Handle HTTP requests and serve views using DTOs.
-* **Services:** Manage business logic, validation, and Entity-to-DTO mapping.
-* **Repositories:** Execute database operations via Spring Data JPA.
+## Repository Structure Note for Docker Compose
+For `docker compose up --build` to locate all service directories correctly using the relative build contexts, ensure that all three repositories (`GuestHouse-Booking-System`, `GuestHouse-Customer-Service`, `GuestHouse-Review-Service`) and your infrastructure repository (`GuestHouse-Infrastructure`) are placed within the same parent folder like this:
 
-## Setup and Installation
-
-### 1. Clone Repository
-```bash
-git clone [https://github.com/Karwana/GuestHouse-Booking-System.git](https://github.com/Karwana/GuestHouse-Booking-System.git)
-cd GuestHouse-Booking-System
-```
-
-### 2. Create Database
-Run the following in MySQL Workbench or terminal:
-```sql
-CREATE DATABASE guesthouse_db;
-```
-
-### 3. Configure Local Properties
-Create the file `src/main/resources/application-local.properties` and fill in your MySQL credentials:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/guesthouse_db
-spring.datasource.username=YOUR_USERNAME
-spring.datasource.password=YOUR_PASSWORD
-```
-
-### 4. Run the Application
-```bash
-./mvnw spring-boot:run
-```
-Or run `GuestHouseBookingSystemApplication.java` directly in IntelliJ.
-
-### 5. Open in Browser
-```bash
-http://localhost:8080/
-```
+```text
+📁 parent-folder/
+├── 📁 GuestHouse-Infrastructure/  (contains docker-compose.yml)
+├── 📁 GuestHouse-Booking-System/
+├── 📁 GuestHouse-Customer-Service/
+└── 📁 GuestHouse-Review-Service/
