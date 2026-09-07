@@ -1,6 +1,9 @@
 package org.nackademin.guesthousebookingsystem.service;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.nackademin.guesthousebookingsystem.client.CustomerClient;
 import org.nackademin.guesthousebookingsystem.dto.BookingDto;
 import org.nackademin.guesthousebookingsystem.dto.RoomDto;
 import org.nackademin.guesthousebookingsystem.entity.Booking;
@@ -11,6 +14,7 @@ import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -32,12 +36,17 @@ class BookingServiceImplTest {
     @Autowired
     private RoomRepository roomRepository;
 
+    @MockitoBean
+    private CustomerClient customerClient;
+
     private final Long customerId = 1L;
     private Room savedRoom;
     private Booking savedBooking;
 
     @BeforeEach
     void setUp() {
+        Mockito.when(customerClient.customerExists(Mockito.anyLong())).thenReturn(true);
+
         Room room = new Room(null, 101, RoomType.DOUBLE, 1);
         savedRoom = roomRepository.save(room);
 
