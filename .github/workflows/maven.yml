@@ -15,10 +15,10 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: guesthouse_testdb
+          MYSQL_DATABASE: booking_db
         ports:
           - 3306:3306
-
+          
     steps:
     - uses: actions/checkout@v4
     
@@ -29,10 +29,10 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    - name: Build and Test with Maven
+      run: mvn -B clean verify --file pom.xml
       env:
-        SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/guesthouse_testdb
+        SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/booking_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
         SPRING_DATASOURCE_USERNAME: root
         SPRING_DATASOURCE_PASSWORD: rootpassword
-        SPRING_PROFILES_ACTIVE: test
+        SPRING_PROFILES_ACTIVE: local
