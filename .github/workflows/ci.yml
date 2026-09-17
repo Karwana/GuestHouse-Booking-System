@@ -18,6 +18,11 @@ jobs:
           MYSQL_DATABASE: booking_db
         ports:
           - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -prootpassword"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
           
     steps:
     - name: Checkout code
@@ -29,9 +34,13 @@ jobs:
         java-version: "21"
         distribution: "temurin"
         cache: "maven"
-    
-    - name: Build and run tests
-      run: mvn -B clean verify --file pom.xml
+        
+    - name: Test with Maven
+      run: mvn test
+      
+    - name: Build with Maven
+      run: mvn -B package
+      
       env:
         SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/booking_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
         SPRING_DATASOURCE_USERNAME: root
