@@ -20,16 +20,17 @@ jobs:
           - 3306:3306
           
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up JDK 21
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
+        java-version: "21"
+        distribution: "temurin"
+        cache: "maven"
     
-    - name: Build and Test with Maven
+    - name: Build and run tests
       run: mvn -B clean verify --file pom.xml
       env:
         SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/booking_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
