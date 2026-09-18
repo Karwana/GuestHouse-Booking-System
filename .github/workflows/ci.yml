@@ -39,12 +39,11 @@ jobs:
       run: mvn test
       
     - name: Build with Maven
-      run: mvn -B package
+      run: mvn -B package -DskipTests
       
       env:
         SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/booking_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
         SPRING_DATASOURCE_USERNAME: root
         SPRING_DATASOURCE_PASSWORD: rootpassword
-        SPRING_PROFILES_ACTIVE: local
         REVIEW_SERVICE_URL: http://localhost:8082
         CUSTOMER_SERVICE_URL: http://localhost:8081
