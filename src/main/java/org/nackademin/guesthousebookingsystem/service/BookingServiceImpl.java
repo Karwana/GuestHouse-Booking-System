@@ -9,6 +9,8 @@ import org.nackademin.guesthousebookingsystem.entity.Booking;
 import org.nackademin.guesthousebookingsystem.entity.Room;
 import org.nackademin.guesthousebookingsystem.repository.BookingRepository;
 import org.nackademin.guesthousebookingsystem.repository.RoomRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
+
+    private static final Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
@@ -29,16 +33,14 @@ public class BookingServiceImpl implements BookingService {
                 booking.getRoom().getExtraBeds()
         );
 
-        String customerName = "Kund-id: "
-                + booking.getCustomerId();
+        String customerName = "Kund-id: " + booking.getCustomerId();
         try {
-            CustomerDto customer = customerClient
-                    .getCustomerById(booking.getCustomerId());
+            CustomerDto customer = customerClient.getCustomerById(booking.getCustomerId());
             if (customer != null) {
                 customerName = customer.getName();
             }
         } catch (RuntimeException e) {
-
+            log.warn("Kunde inte hämta kunddata för kund-id {}: {}", booking.getCustomerId(), e.getMessage());
         }
 
         return new BookingDto(
@@ -54,8 +56,7 @@ public class BookingServiceImpl implements BookingService {
     private Booking toEntity(BookingDto dto) {
         Room room = roomRepository
                 .findById(dto.getRoom().getId())
-                .orElseThrow(() ->
-                        new RuntimeException("Rum hittades inte"));
+                .orElseThrow(() -> new RuntimeException("Rum hittades inte"));
         return new Booking(
                 dto.getId(),
                 dto.getCustomerId(),
@@ -66,14 +67,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void checkConflicts(BookingDto dto, Long excludeId) {
-        if (dto.getStartDate() == null
-                || dto.getEndDate() == null) {
+        if (dto.getStartDate() == null || dto.getEndDate() == null) {
             throw new IllegalArgumentException("Datum saknas");
         }
         if (!dto.getEndDate().isAfter(dto.getStartDate())) {
-            throw new IllegalArgumentException(
-                    "Utcheckningsdatum måste vara "
-                            + "efter incheckningsdatum");
+            throw new IllegalArgumentException("Utcheckningsdatum måste vara efter incheckningsdatum");
         }
         List<Booking> conflicts = bookingRepository.findOverlapping(
                 dto.getRoom().getId(),
@@ -82,8 +80,7 @@ public class BookingServiceImpl implements BookingService {
                 excludeId
         );
         if (!conflicts.isEmpty()) {
-            throw new IllegalStateException(
-                    "Rummet är redan bokat för de valda datumen");
+            throw new IllegalStateException("Rummet är redan bokat för de valda datumen");
         }
     }
 
@@ -99,45 +96,53 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(Long id) {
         return bookingRepository.findById(id)
                 .map(this::toDto)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Bokning hittades inte"));
+                .orElseThrow(() -> new RuntimeException("Bokning hittades inte"));
     }
 
     @Override
     public BookingDto saveBooking(BookingDto bookingDto) {
-        if (!customerClient.customerExists(
-                bookingDto.getCustomerId())) {
-            throw new RuntimeException(
-                    "Kund med id "
-                            + bookingDto.getCustomerId()
-                            + " hittades inte");
+        log.info("Skapar ny bokning för kund-id: {}", bookingDto.getCustomerId());
+
+        if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+            log.warn("Kund med id {} hittades inte i kundtjänsten", bookingDto.getCustomerId());
+            throw new RuntimeException("Kund med id " + bookingDto.getCustomerId() + " hittades inte");
         }
-        checkConflicts(bookingDto, -1L);
-        Booking saved = bookingRepository.save(
-                toEntity(bookingDto));
-        return toDto(saved);
+
+        try {
+            checkConflicts(bookingDto, -1L);
+            Booking saved = bookingRepository.save(toEntity(bookingDto));
+            log.info("Bokning skapad med id: {}", saved.getId());
+            return toDto(saved);
+        } catch (Exception e) {
+            log.error("Misslyckades med att spara bokning för kund-id: {}", bookingDto.getCustomerId(), e);
+            throw e;
+        }
     }
 
     @Override
     public BookingDto updateBooking(Long id, BookingDto bookingDto) {
-        if (!customerClient.customerExists(
-                bookingDto.getCustomerId())) {
-            throw new RuntimeException(
-                    "Kund med id "
-                            + bookingDto.getCustomerId()
-                            + " hittades inte");
+        if (!customerClient.customerExists(bookingDto.getCustomerId())) {
+            log.warn("Uppdatering misslyckades: kund med id {} existerar inte", bookingDto.getCustomerId());
+            throw new RuntimeException("Kund med id " + bookingDto.getCustomerId() + " hittades inte");
         }
         bookingDto.setId(id);
         checkConflicts(bookingDto, id);
-        Booking saved = bookingRepository.save(
-                toEntity(bookingDto));
+        Booking saved = bookingRepository.save(toEntity(bookingDto));
+        log.info("Bokning med id {} uppdaterad", id);
         return toDto(saved);
     }
 
     @Override
     public void deleteBooking(Long id) {
+        log.info("Försöker ta bort bokning med id: {}", id);
+
+        if (!bookingRepository.existsById(id)) {
+            log.error("Kunde inte radera: Bokning med id {} hittades inte", id);
+            throw new RuntimeException("Bokning med id " + id + " hittades inte");
+        }
+
         bookingRepository.deleteById(id);
+        log.info("Bokning med id {} togs bort framgångsrikt", id);
     }
 
     @Override
@@ -146,10 +151,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public boolean customerHasBookedRoom(
-            Long customerId,
-            Long roomId) {
-        return bookingRepository
-                .existsByCustomerIdAndRoomId(customerId, roomId);
+    public boolean customerHasBookedRoom(Long customerId, Long roomId) {
+        return bookingRepository.existsByCustomerIdAndRoomId(customerId, roomId);
     }
 }
