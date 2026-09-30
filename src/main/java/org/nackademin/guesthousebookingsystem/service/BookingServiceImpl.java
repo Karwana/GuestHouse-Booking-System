@@ -40,7 +40,7 @@ public class BookingServiceImpl implements BookingService {
                 customerName = customer.getName();
             }
         } catch (RuntimeException e) {
-
+            log.warn("Kunde inte hämta kunddata för kund-id {}: {}", booking.getCustomerId(), e.getMessage());
         }
 
         return new BookingDto(
@@ -134,8 +134,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void deleteBooking(Long id) {
-        log.info("Tar bort bokning med id {}", id);
+        log.info("Försöker ta bort bokning med id: {}", id);
+
+        if (!bookingRepository.existsById(id)) {
+            log.error("Kunde inte radera: Bokning med id {} hittades inte", id);
+            throw new RuntimeException("Bokning med id " + id + " hittades inte");
+        }
+
         bookingRepository.deleteById(id);
+        log.info("Bokning med id {} togs bort framgångsrikt", id);
     }
 
     @Override
