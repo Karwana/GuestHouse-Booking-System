@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     env:
       SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/booking_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
@@ -17,7 +16,6 @@ jobs:
       SPRING_PROFILES_ACTIVE: local
       REVIEW_SERVICE_URL: http://localhost:8082
       CUSTOMER_SERVICE_URL: http://localhost:8081
-
     services:
       mysql:
         image: mysql:8.0
@@ -31,7 +29,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
