@@ -40,6 +40,8 @@ class BookingServiceImplTest {
     private CustomerClient customerClient;
 
     private final Long customerId = 1L;
+    private final Long nonExistingCustomerId = 999L;
+    private final Long nonExistingBookingId = 999_999L;
     private Room savedRoom;
     private Booking savedBooking;
 
@@ -123,5 +125,54 @@ class BookingServiceImplTest {
         bookingService.deleteBooking(savedBooking.getId());
 
         assertEquals(0, bookingRepository.findAll().size());
+    }
+
+    @Test
+    void saveBooking_shouldThrowWhenCustomerDoesNotExist() {
+        Mockito.when(customerClient.customerExists(nonExistingCustomerId)).thenReturn(false);
+        RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
+
+        BookingDto newBooking = new BookingDto(null, nonExistingCustomerId, null, roomDto,
+                LocalDate.of(2026, 8, 1),
+                LocalDate.of(2026, 8, 5));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> bookingService.saveBooking(newBooking));
+
+        assertEquals("Kund med id " + nonExistingCustomerId + " hittades inte", ex.getMessage());
+        assertEquals(1, bookingRepository.findAll().size());
+    }
+
+    @Test
+    void updateBooking_shouldThrowWhenCustomerDoesNotExist() {
+        Mockito.when(customerClient.customerExists(nonExistingCustomerId)).thenReturn(false);
+        RoomDto roomDto = new RoomDto(savedRoom.getId(), 101, RoomType.DOUBLE, 1);
+
+        BookingDto updateInfo = new BookingDto(null, nonExistingCustomerId, null, roomDto,
+                LocalDate.of(2026, 7, 2),
+                LocalDate.of(2026, 7, 6));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> bookingService.updateBooking(savedBooking.getId(), updateInfo));
+
+        assertEquals("Kund med id " + nonExistingCustomerId + " hittades inte", ex.getMessage());
+    }
+
+    @Test
+    void deleteBooking_shouldThrowWhenBookingDoesNotExist() {
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> bookingService.deleteBooking(nonExistingBookingId));
+
+        assertEquals("Bokning med id " + nonExistingBookingId + " hittades inte", ex.getMessage());
+        assertEquals(1, bookingRepository.findAll().size());
+    }
+
+    @Test
+    void getBookingById_shouldThrowWhenBookingDoesNotExist() {
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> bookingService.getBookingById(nonExistingBookingId));
+
+        assertTrue(ex.getMessage().contains("Bokning hittades inte"),
+                "Oväntat felmeddelande: " + ex.getMessage());
     }
 }
