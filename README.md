@@ -6,10 +6,10 @@ A web application for managing guest house reservations, built with Spring Boot,
 This application is part of an interconnected microservices architecture designed to run alongside **Customer Service** and **Review Service** via Docker Compose. It communicates directly with Customer Service via REST to fetch customer details and validate bookings.
 
 ## Live Deployments
-* **Production:** [https://guesthouse-booking-system-production.up.railway.app](https://guesthouse-booking-system-production.up.railway.app)
-* **Production Health:** [https://guesthouse-booking-system-production.up.railway.app/actuator/health](https://guesthouse-booking-system-production.up.railway.app/actuator/health)
-* **Staging:** [https://booking-prod-staging.up.railway.app](https://booking-prod-staging.up.railway.app)
-* **Staging Health:** [https://booking-prod-staging.up.railway.app/actuator/health](https://booking-prod-staging.up.railway.app/actuator/health)
+* **Production:** [https://booking-prod-production.up.railway.app](https://booking-prod-production.up.railway.app)
+* **Production Health:** [https://booking-prod-production.up.railway.app/actuator/health](https://booking-prod-production.up.railway.app/actuator/health)
+* **Staging:** [https://booking-stage-staging.up.railway.app](https://booking-stage-staging.up.railway.app)
+* **Staging Health:** [https://booking-stage-staging.up.railway.app/actuator/health](https://booking-stage-staging.up.railway.app/actuator/health)
 
 ## Features
 * **Customers:** Register, update, and delete customers.
@@ -69,7 +69,7 @@ The team applies **Trunk-Based Development** utilizing short-lived feature branc
      * `:latest` (for general reference)
      * `:<commit-sha>` (unique, immutable tag used for all deployments and rollbacks)
 5. **Deployment:**
-   * Deployment to **Staging** is triggered automatically on merge to `master` via Railway's GitHub integration, which continuously deploys the tested build.
+   * Deployment to **Staging** is triggered automatically on merge to `master`, GitHub Actions builds and pushes `:latest` to Docker Hub where Railway detects the updated image and triggers an automated rolling redeployment.
    * After verifying staging functionality and health endpoints, the **same release image** is deployed to **Production** in Railway.
    * Both staging and production run the exact same image artifact; only environment variables (database host/port, database name, and service URLs) differ between the environments.
 
@@ -96,7 +96,7 @@ Every build pushed to Docker Hub is tagged with its immutable Git commit SHA alo
 * `<DOCKER_USERNAME>/booking-system:latest`
 * `<DOCKER_USERNAME>/booking-system:<commit-sha>`
 
-Deployments always use the commit-SHA tag, so every running version corresponds exactly to a tested commit.
+While Staging tracks the `:latest` tag for immediate continuous delivery, Production deployments strictly use the immutable commit-SHA tag, ensuring every release in production corresponds to an exact, verified commit.
 
 ### How to Roll Back via Commit-SHA
 If a deployment fails or introduces a breaking bug, roll back in four steps:
@@ -112,7 +112,7 @@ If a deployment fails or introduces a breaking bug, roll back in four steps:
 3. **Deploy and verify:** Redeploy the service. Railway checks `/actuator/health` automatically, and you can also verify it directly:
 
 ```bash
-   curl -s https://guesthouse-booking-system-production.up.railway.app/actuator/health
+   curl -s https://booking-prod-production.up.railway.app/actuator/health
 ```
 
    The response should contain `"status":"UP"`.
