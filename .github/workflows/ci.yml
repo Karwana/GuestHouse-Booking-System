@@ -73,6 +73,6 @@ jobs:
               "query": "mutation ServiceInstanceRedeploy($environmentId: String!, $serviceId: String!) { serviceInstanceRedeploy(environmentId: $environmentId, serviceId: $serviceId) }",
               "variables": {
                 "environmentId": "${{ secrets.RAILWAY_STAGING_ENV_ID }}",
-                "serviceId": "${{ secrets.RAILWAY_SERVICE_ID }}"
+                "serviceId": "${{ secrets.RAILWAY_STAGING_SERVICE_ID }}"
               }
             }'
