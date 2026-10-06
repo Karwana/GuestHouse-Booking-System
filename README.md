@@ -61,17 +61,18 @@ The team applies **Trunk-Based Development** utilizing short-lived feature branc
 2. **Pull Request (PR) & Code Review:**
    * Merging into `master` requires an approved Pull Request and peer code review with concrete comments.
    * GitHub Actions triggers automatically on PR events (`on: pull_request: branches: [master]`).
-   * The pipeline provisions an isolated MySQL service container and executes `mvn test`. Branch protection rules block merging if the checks fail.
+   * The pipeline provisions an isolated MySQL service container and runs the tests with `mvn -B package`. Branch protection rules block merging if the checks fail.
 3. **Merge to Master:** Once approved and verified green, changes are merged into `master`.
 4. **Automated Image Build & Docker Hub Push:**
-   * GitHub Actions packages the application (`mvn -B package -DskipTests`).
+   * GitHub Actions builds the application (`mvn -B package`, which also runs the tests).
    * The Docker image is tagged and pushed to Docker Hub under two tags:
      * `:latest` (for general reference)
      * `:<commit-sha>` (unique, immutable tag used for all deployments and rollbacks)
 5. **Deployment:**
-   * Deployment to **Staging** is triggered automatically on merge to `master`, GitHub Actions builds and pushes `:latest` to Docker Hub where Railway detects the updated image and triggers an automated rolling redeployment.
-   * After verifying staging functionality and health endpoints, the **same release image** is deployed to **Production** in Railway.
-   * Both staging and production run the exact same image artifact; only environment variables (database host/port, database name, and service URLs) differ between the environments.
+   * **Staging (automatic):** After the image is pushed, the pipeline triggers a redeploy of the Staging service in Railway through Railway's API. Staging tracks the `:latest` tag, so every merge to `master` ends up in staging.
+   * **Production (manual):** After verifying staging and its `/actuator/health`, we run the **Production Release** workflow (GitHub Actions → Run workflow). It sets the Production service to the image `booking-system:<commit-sha>` and deploys it. Leaving the SHA field empty deploys the newest `master` commit.
+   * `:latest` and `:<commit-sha>` are pushed from the same build and have the same digest on Docker Hub, so Staging and Production run the exact same image. Only environment variables (database host/port, database name and service URLs) differ.
+   * Each environment has its own MySQL database.
 
 ## Observability
 * **Logging:** We use standardized logging levels (INFO, WARN, ERROR) via SLF4J. INFO logs normal business events (startup, booking creation), WARN flags recoverable anomalies (e.g. slow responses or non-critical dependencies), and ERROR captures unhandled exceptions. Passwords, tokens, and personal data are never logged.
@@ -99,28 +100,9 @@ Every build pushed to Docker Hub is tagged with its immutable Git commit SHA alo
 While Staging tracks the `:latest` tag for immediate continuous delivery, Production deployments strictly use the immutable commit-SHA tag, ensuring every release in production corresponds to an exact, verified commit.
 
 ### How to Roll Back via Commit-SHA
-If a deployment fails or introduces a breaking bug, roll back in four steps:
+If a deployment fails or introduces a breaking bug:
 
 1. **Get the stable SHA:** Go to GitHub Actions or the commit history and copy the commit SHA of the last working build.
-
-2. **Update the image in Railway:** In Railway, select the environment (**Production** or **Staging**) → the **booking** service → set the Docker image tag to:
-
-```text
-   <DOCKER_USERNAME>/booking-system:<stable-commit-sha>
-```
-
-3. **Deploy and verify:** Redeploy the service. Railway checks `/actuator/health` automatically, and you can also verify it directly:
-
-```bash
-   curl -s https://booking-prod-production.up.railway.app/actuator/health
-```
-
-   The response should contain `"status":"UP"`.
-
-4. **Revert in Git via PR:** To keep the repository history in line with what is running, revert the faulty commit on a separate branch and merge it through a Pull Request (direct pushes to `master` are blocked by branch protection):
-
-```bash
-   git checkout -b fix/revert-bad-commit
-   git revert <faulty-commit-sha>
-   git push origin fix/revert-bad-commit
-```
+2. **Redeploy production:** Go to GitHub Actions → **Production Release** → **Run workflow**, enter the stable SHA and run it. Production is set to `<DOCKER_USERNAME>/booking-system:<stable-commit-sha>`.
+3. **Verify:** Check the health endpoint, which should contain `"status":"UP"`:
+[https://booking-prod-production.up.railway.app/actuator/health](https://booking-prod-production.up.railway.app/actuator/health)
