@@ -16,7 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
 public class BookingController {
-//ci testing
+
     private final BookingService bookingService;
     private final CustomerClient customerClient;
     private final RoomService roomService;
