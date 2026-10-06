@@ -20,7 +20,7 @@ public class BookingController {
     private final BookingService bookingService;
     private final CustomerClient customerClient;
     private final RoomService roomService;
-
+// ci testing
     private void populateModel(Model model) {
         model.addAttribute("bookings", bookingService.getAllBookings());
         model.addAttribute("rooms", roomService.getAllRooms());
