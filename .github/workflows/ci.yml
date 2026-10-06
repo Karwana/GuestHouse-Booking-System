@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with Maven
+name: CI/CD Pipeline - Staging
 
 on:
   push:
@@ -7,8 +7,9 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+
     env:
       SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/booking_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
@@ -16,6 +17,7 @@ jobs:
       SPRING_PROFILES_ACTIVE: local
       REVIEW_SERVICE_URL: http://localhost:8082
       CUSTOMER_SERVICE_URL: http://localhost:8081
+
     services:
       mysql:
         image: mysql:8.0
@@ -29,6 +31,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,11 +43,8 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      - name: Test with Maven
-        run: mvn test
-
-      - name: Build with Maven
-        run: mvn -B package -DskipTests
+      - name: Test and Package with Maven
+        run: mvn -B package
 
       - name: Login to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -54,10 +54,25 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build and push Docker image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/booking-system:latest
             ${{ secrets.DOCKER_USERNAME }}/booking-system:${{ github.sha }}
+
+      - name: Trigger Railway Staging Redeploy
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          curl -s -X POST https://backboard.railway.com/graphql/v2 \
+            -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "mutation ServiceInstanceRedeploy($environmentId: String!, $serviceId: String!) { serviceInstanceRedeploy(environmentId: $environmentId, serviceId: $serviceId) }",
+              "variables": {
+                "environmentId": "${{ secrets.RAILWAY_STAGING_ENV_ID }}",
+                "serviceId": "${{ secrets.RAILWAY_SERVICE_ID }}"
+              }
+            }'
