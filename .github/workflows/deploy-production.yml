@@ -4,31 +4,34 @@ on:
   workflow_dispatch:
     inputs:
       commit_sha:
-        description: "Git Commit SHA att driftsätta (lämna tomt för senaste master)"
+        description: "Commit SHA to deploy (leave empty for newest master). Use an older SHA to roll back."
         required: false
         default: ""
 
 jobs:
   deploy-production:
-    name: Trigger Railway Production
+    name: Deploy to Railway production
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy Image to Production
+      - name: Deploy image to production
+        env:
+          TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
+          ENV_ID: ${{ secrets.RAILWAY_PROD_ENV_ID }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          INPUT_SHA: ${{ github.event.inputs.commit_sha }}
+          DEFAULT_SHA: ${{ github.sha }}
         run: |
-          TARGET_SHA="${{ github.event.inputs.commit_sha }}"
-          if [ -z "$TARGET_SHA" ]; then
-            TARGET_SHA="${{ github.sha }}"
-          fi
-          echo "Driftsätter version med commit SHA: $TARGET_SHA till produktion..."
-
-          curl -s -X POST https://backboard.railway.com/graphql/v2 \
-            -H "Authorization: Bearer ${{ secrets.RAILWAY_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "query": "mutation ServiceInstanceRedeploy($environmentId: String!, $serviceId: String!) { serviceInstanceRedeploy(environmentId: $environmentId, serviceId: $serviceId) }",
-              "variables": {
-                "environmentId": "${{ secrets.RAILWAY_PROD_ENV_ID }}",
-                "serviceId": "${{ secrets.RAILWAY_SERVICE_ID }}"
-              }
-            }'
+          TARGET_SHA="${INPUT_SHA:-$DEFAULT_SHA}"
+          IMAGE="${DOCKER_USERNAME}/booking-system:${TARGET_SHA}"
+          echo "Deploying $IMAGE to production"
+          post() {
+            curl -sS https://backboard.railway.com/graphql/v2 \
+              -H "Authorization: Bearer $TOKEN" \
+              -H "Content-Type: application/json" -d "$1" | tee out.json
+            echo
+            ! grep -q '"errors"' out.json
+          }
+          post "$(jq -n --arg s "$SERVICE_ID" --arg e "$ENV_ID" --arg i "$IMAGE" '{query:"mutation($s:String!,$e:String!,$i:String!){serviceInstanceUpdate(serviceId:$s,environmentId:$e,input:{source:{image:$i}})}",variables:{s:$s,e:$e,i:$i}}')"
+          post "$(jq -n --arg s "$SERVICE_ID" --arg e "$ENV_ID" '{query:"mutation($s:String!,$e:String!){serviceInstanceDeployV2(serviceId:$s,environmentId:$e)}",variables:{s:$s,e:$e}}')"
