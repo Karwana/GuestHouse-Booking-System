@@ -66,7 +66,7 @@ The team applies **Trunk-Based Development** utilizing short-lived feature branc
 4. **Automated Image Build & Docker Hub Push:**
    * GitHub Actions builds the application (`mvn -B package`, which also runs the tests).
    * The Docker image is tagged and pushed to Docker Hub under two tags:
-     * `:latest` (for general reference)
+     * `:latest` (tracked by Staging)
      * `:<commit-sha>` (unique, immutable tag used for all deployments and rollbacks)
 5. **Deployment:**
    * **Staging (automatic):** After the image is pushed, the pipeline triggers a redeploy of the Staging service in Railway through Railway's API. Staging tracks the `:latest` tag, so every merge to `master` ends up in staging.
