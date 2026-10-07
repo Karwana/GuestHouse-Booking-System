@@ -27,8 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class BookingServiceImplTest {
 
-    @Autowired
-    private BookingService bookingService;
+
 
     @Autowired
     private BookingRepository bookingRepository;
